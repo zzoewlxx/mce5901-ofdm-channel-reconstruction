@@ -28,7 +28,7 @@ from runlog import save_run  # noqa: E402
 
 SNRS = [0, 5, 10, 15, 20, 25, 30]
 DENSITIES = [16, 8, 4]
-RHOS = [1e-4, 1e-3, 1e-2, 1e-1]
+RHOS = [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
 METHODS = {"linear": ("Linear interpolation", "#2a78d6", "o"),
            "spline": ("Cubic spline", "#eb6834", "s"),
            "lmmse": ("LMMSE (training statistics)", "#1baf7a", "D")}

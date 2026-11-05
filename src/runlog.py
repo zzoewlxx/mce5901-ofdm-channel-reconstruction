@@ -33,7 +33,8 @@ def save_run(experiment, member, config, metrics, files=(), note=""):
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M")
     out = os.path.join(ROOT, "results", f"{stamp}_{member}_{experiment}")
     os.makedirs(out, exist_ok=False)
-    status = _git("status", "--porcelain")
+    # only modified tracked files count; outputs a run just created (untracked) do not
+    status = _git("status", "--porcelain", "--untracked-files=no")
     try:
         import numpy
         np_version = numpy.__version__
