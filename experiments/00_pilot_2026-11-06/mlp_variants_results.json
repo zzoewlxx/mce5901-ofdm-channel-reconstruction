@@ -1,0 +1,119 @@
+{
+ "fixed_noise": {
+  "16": {
+   "0": {
+    "linear": -2.09,
+    "lmmse": -11.72,
+    "mlp": -11.48,
+    "mlp_residual": -11.72
+   },
+   "10": {
+    "linear": -12.08,
+    "lmmse": -20.46,
+    "mlp": -20.15,
+    "mlp_residual": -20.46
+   },
+   "20": {
+    "linear": -22.05,
+    "lmmse": -29.05,
+    "mlp": -28.19,
+    "mlp_residual": -29.05,
+    "mlp_snr_specific": -27.92
+   },
+   "30": {
+    "linear": -31.81,
+    "lmmse": -37.65,
+    "mlp": -33.78,
+    "mlp_residual": -37.64,
+    "mlp_snr_specific": -33.24
+   }
+  },
+  "8": {
+   "0": {
+    "linear": -1.79,
+    "lmmse": -9.11,
+    "mlp": -8.93,
+    "mlp_residual": -9.11
+   },
+   "10": {
+    "linear": -11.79,
+    "lmmse": -17.91,
+    "mlp": -17.67,
+    "mlp_residual": -17.91
+   },
+   "20": {
+    "linear": -21.74,
+    "lmmse": -26.51,
+    "mlp": -25.86,
+    "mlp_residual": -26.51,
+    "mlp_snr_specific": -25.78
+   },
+   "30": {
+    "linear": -31.54,
+    "lmmse": -35.35,
+    "mlp": -31.69,
+    "mlp_residual": -35.34,
+    "mlp_snr_specific": -32.18
+   }
+  }
+ },
+ "per_link": {
+  "16": {
+   "0": {
+    "linear": -2.29,
+    "lmmse": -11.13,
+    "mlp": -12.3,
+    "mlp_residual": -11.13
+   },
+   "10": {
+    "linear": -12.27,
+    "lmmse": -19.6,
+    "mlp": -20.53,
+    "mlp_residual": -19.6
+   },
+   "20": {
+    "linear": -22.17,
+    "lmmse": -28.39,
+    "mlp": -27.72,
+    "mlp_residual": -28.39,
+    "mlp_snr_specific": -27.39
+   },
+   "30": {
+    "linear": -31.26,
+    "lmmse": -35.66,
+    "mlp": -29.75,
+    "mlp_residual": -35.64,
+    "mlp_snr_specific": -31.6
+   }
+  },
+  "8": {
+   "0": {
+    "linear": -1.99,
+    "lmmse": -8.82,
+    "mlp": -10.2,
+    "mlp_residual": -8.82
+   },
+   "10": {
+    "linear": -11.98,
+    "lmmse": -17.03,
+    "mlp": -18.56,
+    "mlp_residual": -17.04
+   },
+   "20": {
+    "linear": -21.86,
+    "lmmse": -25.94,
+    "mlp": -26.13,
+    "mlp_residual": -25.92,
+    "mlp_snr_specific": -25.78
+   },
+   "30": {
+    "linear": -31.02,
+    "lmmse": -33.78,
+    "mlp": -29.36,
+    "mlp_residual": -33.6,
+    "mlp_snr_specific": -30.8
+   }
+  }
+ },
+ "runtime_s": 105.8
+}

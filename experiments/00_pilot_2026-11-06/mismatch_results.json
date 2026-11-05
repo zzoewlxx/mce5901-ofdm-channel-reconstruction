@@ -1,0 +1,132 @@
+{
+ "16": {
+  "0": {
+   "linear": -2.11,
+   "lmmse_true": -11.85,
+   "lmmse_nom10": -11.13,
+   "lmmse_nom20": -9.56,
+   "lmmse_nom30": -9.01,
+   "mlp_snr_input": -11.56,
+   "mlp_blind": -11.5
+  },
+  "5": {
+   "linear": -7.11,
+   "lmmse_true": -16.09,
+   "lmmse_nom10": -15.78,
+   "lmmse_nom20": -14.39,
+   "lmmse_nom30": -13.86,
+   "mlp_snr_input": -15.82,
+   "mlp_blind": -15.77
+  },
+  "10": {
+   "linear": -12.11,
+   "lmmse_true": -20.47,
+   "lmmse_nom10": -20.47,
+   "lmmse_nom20": -19.56,
+   "lmmse_nom30": -19.03,
+   "mlp_snr_input": -20.16,
+   "mlp_blind": -20.13
+  },
+  "15": {
+   "linear": -17.06,
+   "lmmse_true": -24.65,
+   "lmmse_nom10": -24.13,
+   "lmmse_nom20": -24.41,
+   "lmmse_nom30": -23.96,
+   "mlp_snr_input": -24.21,
+   "mlp_blind": -24.03
+  },
+  "20": {
+   "linear": -22.08,
+   "lmmse_true": -29.18,
+   "lmmse_nom10": -26.6,
+   "lmmse_nom20": -29.18,
+   "lmmse_nom30": -28.92,
+   "mlp_snr_input": -28.29,
+   "mlp_blind": -27.45
+  },
+  "25": {
+   "linear": -26.99,
+   "lmmse_true": -33.47,
+   "lmmse_nom10": -27.69,
+   "lmmse_nom20": -33.17,
+   "lmmse_nom30": -33.45,
+   "mlp_snr_input": -31.62,
+   "mlp_blind": -29.55
+  },
+  "30": {
+   "linear": -31.8,
+   "lmmse_true": -37.67,
+   "lmmse_nom10": -28.18,
+   "lmmse_nom20": -36.33,
+   "lmmse_nom30": -37.67,
+   "mlp_snr_input": -33.81,
+   "mlp_blind": -30.62
+  }
+ },
+ "8": {
+  "0": {
+   "linear": -1.84,
+   "lmmse_true": -9.29,
+   "lmmse_nom10": -8.63,
+   "lmmse_nom20": -7.11,
+   "lmmse_nom30": -6.45,
+   "mlp_snr_input": -9.09,
+   "mlp_blind": -9.07
+  },
+  "5": {
+   "linear": -6.85,
+   "lmmse_true": -13.52,
+   "lmmse_nom10": -13.3,
+   "lmmse_nom20": -11.96,
+   "lmmse_nom30": -11.33,
+   "mlp_snr_input": -13.36,
+   "mlp_blind": -13.32
+  },
+  "10": {
+   "linear": -11.78,
+   "lmmse_true": -17.94,
+   "lmmse_nom10": -17.94,
+   "lmmse_nom20": -16.94,
+   "lmmse_nom30": -16.31,
+   "mlp_snr_input": -17.72,
+   "mlp_blind": -17.65
+  },
+  "15": {
+   "linear": -16.79,
+   "lmmse_true": -22.2,
+   "lmmse_nom10": -21.8,
+   "lmmse_nom20": -21.89,
+   "lmmse_nom30": -21.37,
+   "mlp_snr_input": -21.83,
+   "mlp_blind": -21.77
+  },
+  "20": {
+   "linear": -21.74,
+   "lmmse_true": -26.49,
+   "lmmse_nom10": -24.31,
+   "lmmse_nom20": -26.49,
+   "lmmse_nom30": -26.22,
+   "mlp_snr_input": -25.85,
+   "mlp_blind": -25.59
+  },
+  "25": {
+   "linear": -26.7,
+   "lmmse_true": -31.05,
+   "lmmse_nom10": -25.64,
+   "lmmse_nom20": -30.65,
+   "lmmse_nom30": -31.02,
+   "mlp_snr_input": -29.51,
+   "mlp_blind": -28.52
+  },
+  "30": {
+   "linear": -31.49,
+   "lmmse_true": -35.36,
+   "lmmse_nom10": -26.14,
+   "lmmse_nom20": -33.66,
+   "lmmse_nom30": -35.36,
+   "mlp_snr_input": -31.72,
+   "mlp_blind": -30.27
+  }
+ }
+}

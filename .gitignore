@@ -1,0 +1,36 @@
+# ---- data and large files: keep them on local disks, never in git ----
+data/
+external/
+*.tfrecords
+*.npz
+*.npy
+*.h5
+*.pt
+*.pth
+*.ckpt
+checkpoints/
+
+# ---- Python ----
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# ---- local settings ----
+config.local.*
+.vscode/
+.idea/
+
+# ---- Office / LaTeX temporaries ----
+~$*
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+report/main.pdf
+.DS_Store

@@ -1,0 +1,5 @@
+numpy>=1.26
+matplotlib>=3.8
+# For the main experiments (CPU builds are enough, no GPU needed). Install when the team agrees:
+# torch>=2.4
+# scikit-learn>=1.5
