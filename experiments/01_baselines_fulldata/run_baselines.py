@@ -15,6 +15,7 @@ Protocol (matches the proposal):
 import argparse
 import os
 import sys
+import tempfile
 import time
 
 import numpy as np
@@ -108,7 +109,10 @@ def main():
             print(f"  {n_obs:2d}/{n} pilots, {snr:2d} dB: " +
                   "  ".join(f"{k} {row[k]['nmse_db']:6.2f}" for k in METHODS) + f"  (rho {rho:g})", flush=True)
 
-    fig_path = os.path.join(HERE, "nmse_vs_snr_val.png")
+    # the figure is written to a temporary folder and copied into results/ by save_run, so a run
+    # never modifies tracked files (which would mark the record as "uncommitted code")
+    fig_dir = tempfile.mkdtemp(prefix="baselines_")
+    fig_path = os.path.join(fig_dir, "nmse_vs_snr_val.png")
     plot(metrics, summary, fig_path, a.smoke)
     try:
         data_ref = os.path.relpath(a.data, ROOT).replace(os.sep, "/")
@@ -119,7 +123,7 @@ def main():
               "block_len": a.block_len, "snrs_db": SNRS, "densities": DENSITIES, "rho_grid": RHOS,
               "scale": float(scale), "smoke": a.smoke, "runtime_s": round(time.time() - t_start, 1)}
     if a.smoke:
-        print("smoke test finished (nothing saved to results/)")
+        print(f"smoke test finished (nothing saved to results/); figure: {fig_path}")
         return
     save_run("baselines-val", a.member, config, {"summary": summary, "nmse": metrics}, files=[fig_path],
              note="full-data baselines on validation run 0056 (odd 50-snapshot blocks); test run 0057 untouched")

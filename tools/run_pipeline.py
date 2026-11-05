@@ -93,7 +93,7 @@ def main():
         raise RuntimeError("baseline run produced no results folder")
     res_dir = os.path.relpath(new[-1], ROOT).replace(os.sep, "/")
 
-    run(["git", "add", res_dir, "experiments/01_baselines_fulldata/nmse_vs_snr_val.png"])
+    run(["git", "add", res_dir])
     run(["git", "commit", "-m", f"Add full-data baseline results on validation run 0056 ({res_dir})" + TRAILER])
     run(["git", "pull", "--rebase"], check=False)
     run(["git", "push"])
