@@ -12,8 +12,8 @@
 |---|---|---|
 | ✅ | 选题与可行性试跑（2026-11-06） | `experiments/00_pilot_2026-11-06/` |
 | ✅ | 提案 v2（11 月 8 日截止） | `docs/proposal/proposal_v2.docx` |
-| ⬜ | 全量数据下载、抽取子载波块、筛掉坏快照 | `tools/`、`src/` |
-| ⬜ | 全量数据上的基线：线性、样条、LMMSE | |
+| 🔄 | 全量数据下载、抽取子载波块、筛掉坏快照（脚本已就绪，自动运行中） | `tools/`、`src/` |
+| 🔄 | 全量数据上的基线：线性、样条、LMMSE（验证集结果自动生成后待组员核对） | `experiments/01_baselines_fulldata/`、`results/` |
 | ⬜ | MLP 及残差变体（只学 LMMSE 的残差） | |
 | ⬜ | 评估：SNR × 导频密度、bootstrap 置信区间、噪声功率失配，可选误码率 | `results/` |
 | ⬜ | 汇报 PPT（12 月 18 日）与最终报告 | `report/` |
@@ -36,10 +36,11 @@
 ## 目录结构
 
 ```
-src/                  可复用代码：dichasus_reader.py（不依赖 TensorFlow 的读取器）、runlog.py（保存结果）
-tools/                download_dichasus.py（下载数据，支持断点续传和 MD5 校验）
+src/                  可复用代码：dichasus_reader.py（读取器）、estimators.py（导频布局、插值、LMMSE、NMSE）、runlog.py（保存结果）
+tools/                download_dichasus.py（下载）、extract_block.py（抽取子载波块）、run_pipeline.py（一键全流程）
 experiments/          每个阶段一个文件夹，脚本可以独立运行
   00_pilot_2026-11-06/  可行性试跑及复核
+  01_baselines_fulldata/ 全量数据基线（验证集）
 results/              每次正式运行的结果（小文件），规则见 results/README.md
 docs/proposal/        提案（v1 是组员原稿，v2 是提交版）
 report/               最终报告（IEEE 会议模板，main.tex + reference.bib）
@@ -60,7 +61,16 @@ python tools/download_dichasus.py --runs 0053 0056   # 只下载部分 run
 python tools/download_dichasus.py --dest D:/data     # 存到其他位置
 ```
 
-中断后重新运行会接着下载，每个文件下载完都会核对 DaRUS 提供的 MD5。读取方式：
+中断后重新运行会接着下载，每个文件下载完都会核对 DaRUS 提供的 MD5。
+
+**不想下载 6.9 GB 的话**：仓库的 Releases 里有 `data-v1`，是处理好的 `dichasus005x_sc256-319.npz`（约 440 MB）：
+- 内容：64 个子载波的块、全部 32 根天线、全部 5 个 run，已做偏移补偿，并带每个向量的质量指标；
+- 用法：放到 `data/processed/` 下即可直接跑基线；
+- 要换其他子载波块，仍需原始数据，用 `python tools/extract_block.py --start ... --width ...` 重新抽取。
+
+一键全流程（下载、抽取、跑基线、提交结果）：`python tools/run_pipeline.py --member <你的名字>`
+
+读取原始文件的方式：
 
 ```python
 import sys; sys.path.insert(0, "src")
