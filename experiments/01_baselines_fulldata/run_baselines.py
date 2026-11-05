@@ -100,11 +100,17 @@ def main():
             est = {"linear": Yr @ Wl.T, "spline": Yr @ Ws.T, "lmmse": lm.apply(Yr, lm.matrix(nv, rho))}
             row = {"lmmse_rho": rho}
             ref_b = np.bincount(rep_gid, np.sum(np.abs(Hr[:, miss]) ** 2, 1), len(rep_blocks))
+            ci = lambda v: [round(float(np.percentile(v, 2.5)), 3), round(float(np.percentile(v, 97.5)), 3)]
+            bs = {}
             for k, e in est.items():
                 err_b = np.bincount(rep_gid, np.sum(np.abs(e[:, miss] - Hr[:, miss]) ** 2, 1), len(rep_blocks))
-                bs = 10 * np.log10(err_b[boots].sum(1) / ref_b[boots].sum(1))
-                row[k] = {"nmse_db": round(nmse_db(e[:, miss], Hr[:, miss]), 3),
-                          "ci95": [round(float(np.percentile(bs, 2.5)), 3), round(float(np.percentile(bs, 97.5)), 3)]}
+                bs[k] = 10 * np.log10(err_b[boots].sum(1) / ref_b[boots].sum(1))
+                row[k] = {"nmse_db": round(nmse_db(e[:, miss], Hr[:, miss]), 3), "ci95": ci(bs[k])}
+            # paired: the same resampled blocks for both methods, so position effects cancel
+            for other in ("linear", "spline"):
+                row[f"gain_lmmse_over_{other}_db"] = {
+                    "value": round(row[other]["nmse_db"] - row["lmmse"]["nmse_db"], 3),
+                    "ci95": ci(bs[other] - bs["lmmse"])}
             metrics[str(n_obs)][str(snr)] = row
             print(f"  {n_obs:2d}/{n} pilots, {snr:2d} dB: " +
                   "  ".join(f"{k} {row[k]['nmse_db']:6.2f}" for k in METHODS) + f"  (rho {rho:g})", flush=True)
@@ -142,9 +148,12 @@ def plot(metrics, summary, path, smoke):
         for s in ("top", "right"):
             ax.spines[s].set_visible(False)
         for k, (name, col, mk) in METHODS.items():
-            y = [metrics[str(n_obs)][str(s)][k]["nmse_db"] for s in SNRS]
-            ax.plot(SNRS, y, color=col, linewidth=2, marker=mk, markersize=7,
-                    markeredgecolor=surface, markeredgewidth=1.5, label=name)
+            rows = [metrics[str(n_obs)][str(s)][k] for s in SNRS]
+            y = np.array([r["nmse_db"] for r in rows])
+            lo = y - np.array([r["ci95"][0] for r in rows])
+            hi = np.array([r["ci95"][1] for r in rows]) - y
+            ax.errorbar(SNRS, y, yerr=[lo, hi], color=col, linewidth=2, elinewidth=1, capsize=3,
+                        marker=mk, markersize=6, markeredgecolor=surface, markeredgewidth=1.2, label=name)
         ax.set_title(f"{n_obs} of 64 pilots", loc="left", fontweight="bold")
         ax.set_xlabel("Pilot SNR (dB)", color=ink2)
     axes[0].set_ylabel("NMSE on withheld subcarriers (dB)", color=ink2)
@@ -154,10 +163,11 @@ def plot(metrics, summary, path, smoke):
                 f"reported on odd blocks of the rest ({summary['val_vectors_report']} vectors).")
     else:
         note = (f"Fit: runs 0053-0055 ({summary['fit_vectors']} vectors). Reported: validation run 0056, "
-                f"odd 50-snapshot blocks ({summary['val_vectors_report']} vectors). Test run 0057 not used. "
-                "95% bootstrap CIs are narrower than the markers.")
+                f"odd 50-snapshot blocks ({summary['val_vectors_report']} vectors). Test run 0057 not used.\n"
+                "Error bars: 95% bootstrap CI of each NMSE over blocks (they mostly reflect how the error level "
+                "varies with position); paired CIs of the gaps between methods are in run.json.")
     fig.text(0.01, 0.01, note, fontsize=8.5, color=ink2)
-    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
     fig.savefig(path, dpi=150, facecolor=surface)
     plt.close(fig)
 
