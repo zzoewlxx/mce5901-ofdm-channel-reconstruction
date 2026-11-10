@@ -90,3 +90,13 @@ class LMMSE:
 
     def apply(self, Y, G):
         return self.mu + (Y - self.mu[self.p]) @ G.T
+
+    def apply_per_sample(self, Y, noise_var, rho=1e-6):
+        """LMMSE when every row has its own noise variance (eigen-decomposition of C[p,p])."""
+        if not hasattr(self, "_eig"):
+            lam, U = np.linalg.eigh(self.C[np.ix_(self.p, self.p)])
+            self._eig = (lam, U, self.C[:, self.p] @ U)
+        lam, U, A = self._eig
+        z = (Y - self.mu[self.p]) @ U.conj()
+        z = z / (lam[None, :] + rho * self.ppow + np.broadcast_to(noise_var, (len(Y),))[:, None])
+        return self.mu + z @ A.T
