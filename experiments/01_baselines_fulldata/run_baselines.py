@@ -150,8 +150,8 @@ def plot(metrics, summary, path, smoke):
         for k, (name, col, mk) in METHODS.items():
             rows = [metrics[str(n_obs)][str(s)][k] for s in SNRS]
             y = np.array([r["nmse_db"] for r in rows])
-            lo = y - np.array([r["ci95"][0] for r in rows])
-            hi = np.array([r["ci95"][1] for r in rows]) - y
+            lo = np.maximum(y - np.array([r["ci95"][0] for r in rows]), 0)
+            hi = np.maximum(np.array([r["ci95"][1] for r in rows]) - y, 0)
             ax.errorbar(SNRS, y, yerr=[lo, hi], color=col, linewidth=2, elinewidth=1, capsize=3,
                         marker=mk, markersize=6, markeredgecolor=surface, markeredgewidth=1.2, label=name)
         ax.set_title(f"{n_obs} of 64 pilots", loc="left", fontweight="bold")

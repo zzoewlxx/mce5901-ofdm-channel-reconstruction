@@ -137,22 +137,22 @@ paras = [
            "A multilayer perceptron with two hidden layers of 128 ReLU units maps the real and imaginary parts of "
            "the noisy pilots and the pilot SNR to the withheld coefficients (about 33,000 parameters). One model per "
            "pilot density is trained over pilot SNRs drawn uniformly from 0–30 dB with fresh noise each epoch, "
-           "using mean-squared error, Adam and early stopping on run 0056. We also test a loss weighted by the "
+           "using mean-squared error, Adam and best-epoch selection on run 0056. We also test a loss weighted by the "
            "expected error at each SNR and a residual variant that only corrects the LMMSE estimate."),
     bullet("Experimental Evaluation:",
            "The primary measure is NMSE on withheld subcarriers (total squared error over total squared reference "
            "magnitude), plotted against pilot SNR for each pilot density on test run 0057, with identical pilots, "
-           "noise realizations and test records for all methods. Neural training uses three seeds, and 95% "
+           "noise realizations and test records for all methods. The final evaluation will use three training seeds, and 95% "
            "confidence intervals come from bootstrapping blocks of consecutive test snapshots. We also report "
            "parameter counts, CPU inference time and robustness when the assumed noise variance is wrong. If time "
            "permits, NMSE will be translated into bit error rate for QPSK and 16-QAM with zero-forcing equalization."),
     bullet("Expected Outcomes:",
            "We expect reproducible code and NMSE-versus-SNR curves for all methods. A full-data validation check "
-           "already shows LMMSE is a strong baseline: the MLP matched it within 0.2 dB up to 20 dB pilot SNR but "
-           "was 1.0–1.5 dB worse at 30 dB; the weighted loss halved this gap, a 3×256 network did not help, "
-           "and the residual variant matched LMMSE. Because one block is nearly two-dimensional (two eigenvalues "
-           "hold 99.99% of the energy), we will, time permitting, also test joint antenna–frequency "
-           "reconstruction, where nonlinear structure may matter. Limitations: one indoor environment, synthetic "
+           "(16 and 8 pilots, seed 0, 15 epochs) suggests LMMSE is a strong baseline: the MLP stayed within 0.2 dB "
+           "of it up to 20 dB pilot SNR but was 1.0–1.5 dB worse at 30 dB; a weighted loss halved this gap, a "
+           "3×256 network did not help, and the residual variant was level with LMMSE. The block covariance is "
+           "concentrated in two modes (99.99% of the energy), which may explain this. Time permitting, we will "
+           "test joint antenna–frequency reconstruction, where a nonlinear gain is a hypothesis, not a promise. Limitations: one indoor environment, synthetic "
            "pilot noise, and the reference CSI's own error (median about −43 dB)."),
     plain(REFERENCES, size_half_points=17),
 ]

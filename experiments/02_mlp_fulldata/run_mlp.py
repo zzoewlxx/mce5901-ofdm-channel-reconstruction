@@ -148,7 +148,12 @@ def main():
                 + " ".join(f"{v} {row[v]['nmse_db']:6.2f}" for v in a.variants))
 
     fig_path = os.path.join(tempfile.mkdtemp(prefix="mlp_"), "gap_to_lmmse_val.png")
-    plot(metrics, a, fig_path, len(d.Hf))
+    files = []
+    try:  # a plotting problem must never lose the metrics of a long run
+        plot(metrics, a, fig_path, len(d.Hf))
+        files = [fig_path]
+    except Exception as e:
+        log(f"plot failed ({e}); metrics are still saved")
     config = {"block": d.block, "threshold_db": d.threshold, "block_len": d.block_len, "densities": a.densities,
               "variants": {v: VARIANTS[v][0] for v in a.variants}, "epochs": a.epochs, "batch": a.batch,
               "seed": a.seed, "snr_train": "U[0,30] dB", "snrs_db": SNRS, "smoke": a.smoke,
@@ -156,7 +161,7 @@ def main():
     if a.smoke:
         log(f"smoke test finished; figure {fig_path}")
         return
-    save_run("mlp-val", a.member, config, {"nmse": metrics, "training": train_info}, files=[fig_path],
+    save_run("mlp-val", a.member, config, {"nmse": metrics, "training": train_info}, files=files,
              note="neural estimators vs LMMSE on validation run 0056 (odd blocks); test run 0057 untouched")
 
 
@@ -179,7 +184,8 @@ def plot(metrics, a, path, n_fit):
             _, name, col, mk = VARIANTS[v]
             g = [metrics[str(n_obs)][str(s)][f"{v}_gain_over_lmmse_db"] for s in SNRS]
             y = np.array([x["value"] for x in g])
-            err = [y - np.array([x["ci95"][0] for x in g]), np.array([x["ci95"][1] for x in g]) - y]
+            err = [np.maximum(y - np.array([x["ci95"][0] for x in g]), 0),   # rounding can give -0.001
+                   np.maximum(np.array([x["ci95"][1] for x in g]) - y, 0)]
             ax.errorbar(SNRS, y, yerr=err, color=col, linewidth=2, elinewidth=1, capsize=3, marker=mk,
                         markersize=6, markeredgecolor=surface, markeredgewidth=1.2, label=name)
         ax.set_title(f"{n_obs} of 64 pilots", loc="left", fontweight="bold")
