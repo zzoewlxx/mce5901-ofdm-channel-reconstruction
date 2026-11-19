@@ -1,0 +1,26 @@
+{
+ "pattern": "32ant x 4sc",
+ "nmse_db_report_blocks": {
+  "0": {
+   "linear-per-antenna": -2.325,
+   "lmmse-per-antenna": -6.978,
+   "lmmse-joint": -7.91
+  },
+  "10": {
+   "linear-per-antenna": -12.339,
+   "lmmse-per-antenna": -15.641,
+   "lmmse-joint": -16.057
+  },
+  "20": {
+   "linear-per-antenna": -22.278,
+   "lmmse-per-antenna": -24.41,
+   "lmmse-joint": -24.824
+  },
+  "30": {
+   "linear-per-antenna": -31.892,
+   "lmmse-per-antenna": -33.372,
+   "lmmse-joint": -33.65
+  }
+ },
+ "note": "validation run 0056, odd blocks; per-antenna = block-diagonal covariance"
+}

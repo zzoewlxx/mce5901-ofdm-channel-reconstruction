@@ -1,0 +1,18 @@
+[freq64] fit (507853, 64) (EM on 200000), val (166373, 64), select 83502, report 82871
+  effective linear dimension (eigenvalues for 90/99/99.9% energy): {'90%': 1, '99%': 1, '99.9%': 2}
+    EM K=4 alpha=0.05: 18 iters, mean loglik 606.735 -> 608.606
+    EM K=16 alpha=0.05: 9 iters, mean loglik 607.177 -> 609.273
+    EM K=64 alpha=0.05: 20 iters, mean loglik 607.862 -> 610.161
+          16sc  0 dB: LMMSE  -12.08 | gmm +0.01 [-0.03,+0.04] | cell-genie +0.14 [+0.10,+0.17] | cellrot-genie +0.12 [+0.09,+0.15]
+          16sc 10 dB: LMMSE  -20.66 | gmm +0.01 [+0.00,+0.01] | cell-genie +0.06 [+0.04,+0.07] | cellrot-genie +0.05 [+0.04,+0.07]
+          16sc 20 dB: LMMSE  -29.37 | gmm +0.01 [+0.01,+0.01] | cell-genie +0.04 [+0.03,+0.06] | cellrot-genie +0.04 [+0.03,+0.05]
+          16sc 30 dB: LMMSE  -37.99 | gmm +0.02 [+0.02,+0.03] | cell-genie +0.05 [+0.04,+0.07] | cellrot-genie +0.05 [+0.03,+0.06]
+           8sc  0 dB: LMMSE   -9.45 | gmm +0.01 [-0.04,+0.06] | cell-genie +0.23 [+0.17,+0.30] | cellrot-genie +0.21 [+0.15,+0.26]
+           8sc 10 dB: LMMSE  -18.17 | gmm +0.01 [-0.00,+0.02] | cell-genie +0.06 [+0.05,+0.07] | cellrot-genie +0.05 [+0.04,+0.06]
+           8sc 20 dB: LMMSE  -26.82 | gmm +0.01 [+0.01,+0.01] | cell-genie +0.04 [+0.03,+0.06] | cellrot-genie +0.04 [+0.03,+0.05]
+           8sc 30 dB: LMMSE  -35.67 | gmm +0.02 [+0.01,+0.02] | cell-genie +0.05 [+0.04,+0.06] | cellrot-genie +0.04 [+0.03,+0.05]
+           4sc  0 dB: LMMSE   -6.96 | gmm +0.00 [-0.06,+0.07] | cell-genie +0.36 [+0.26,+0.45] | cellrot-genie +0.32 [+0.24,+0.40]
+           4sc 10 dB: LMMSE  -15.60 | gmm +0.00 [-0.01,+0.02] | cell-genie +0.07 [+0.05,+0.08] | cellrot-genie +0.06 [+0.04,+0.07]
+           4sc 20 dB: LMMSE  -24.35 | gmm +0.01 [+0.00,+0.01] | cell-genie +0.04 [+0.03,+0.06] | cellrot-genie +0.04 [+0.03,+0.05]
+           4sc 30 dB: LMMSE  -33.31 | gmm +0.01 [+0.01,+0.02] | cell-genie +0.04 [+0.03,+0.05] | cellrot-genie +0.04 [+0.03,+0.05]
+done in 920 s

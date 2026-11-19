@@ -1,0 +1,712 @@
+{
+ "setting": "space32",
+ "smoke": false,
+ "scale": 0.24339712151719822,
+ "dim": 32,
+ "n_fit": 123232,
+ "n_em": 123232,
+ "n_select": 20240,
+ "n_report": 19904,
+ "report_blocks": 52,
+ "effective_dim": {
+  "90%": 17,
+  "99%": 27,
+  "99.9%": 31
+ },
+ "snrs_db": [
+  0,
+  10,
+  20,
+  30
+ ],
+ "gmm_fit": {
+  "gmm K=4 a=0.05": {
+   "iters": 20,
+   "loglik": [
+    9.3678,
+    12.964,
+    13.5164,
+    13.8005,
+    14.1982,
+    14.6355,
+    14.9628,
+    15.2167,
+    15.481,
+    15.7869,
+    15.956,
+    16.1219,
+    16.2649,
+    16.3277,
+    16.3744,
+    16.4229,
+    16.5167,
+    16.5895,
+    16.6635,
+    16.723
+   ],
+   "fit_s": 20.4
+  },
+  "gmm K=16 a=0.05": {
+   "iters": 20,
+   "loglik": [
+    22.5845,
+    25.8523,
+    26.7975,
+    27.446,
+    27.9275,
+    28.352,
+    28.7408,
+    28.9924,
+    29.3165,
+    29.6333,
+    29.7881,
+    29.89,
+    30.0025,
+    30.0291,
+    30.0481,
+    30.0591,
+    30.0672,
+    30.0803,
+    30.0987,
+    30.1063
+   ],
+   "fit_s": 74.5
+  },
+  "gmm K=64 a=0.05": {
+   "iters": 20,
+   "loglik": [
+    33.6826,
+    36.3853,
+    37.5626,
+    38.2369,
+    38.6477,
+    38.9497,
+    39.2067,
+    39.4371,
+    39.6094,
+    39.7261,
+    39.814,
+    39.8751,
+    39.9334,
+    39.9885,
+    40.0342,
+    40.0752,
+    40.1115,
+    40.1388,
+    40.1609,
+    40.1809
+   ],
+   "fit_s": 195.5
+  }
+ },
+ "results": {
+  "32ant": {
+   "0": {
+    "lmmse": {
+     "nmse_db": -4.148,
+     "rho": 0.0
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -6.959,
+     "gain_over_lmmse_db": 2.811,
+     "gain_ci95": [
+      2.629,
+      3.004
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -5.564,
+      "gmm K=16 a=0.05": -6.503,
+      "gmm K=64 a=0.05": -6.959
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -7.408,
+     "gain_over_lmmse_db": 3.26,
+     "gain_ci95": [
+      3.15,
+      3.379
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -6.554,
+      "cell-genie N=16 a=0.3": -6.055,
+      "cell-genie N=64 a=0.05": -7.408,
+      "cell-genie N=64 a=0.3": -6.727
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -6.836,
+     "gain_over_lmmse_db": 2.688,
+     "gain_ci95": [
+      2.549,
+      2.817
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -6.031,
+      "cellrot-genie N=16 a=0.3": -5.66,
+      "cellrot-genie N=64 a=0.05": -6.836,
+      "cellrot-genie N=64 a=0.3": -6.319
+     }
+    }
+   },
+   "10": {
+    "lmmse": {
+     "nmse_db": -11.135,
+     "rho": 0.0
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -12.817,
+     "gain_over_lmmse_db": 1.682,
+     "gain_ci95": [
+      1.597,
+      1.767
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -11.953,
+      "gmm K=16 a=0.05": -12.482,
+      "gmm K=64 a=0.05": -12.817
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -12.911,
+     "gain_over_lmmse_db": 1.776,
+     "gain_ci95": [
+      1.682,
+      1.863
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -12.42,
+      "cell-genie N=16 a=0.3": -11.916,
+      "cell-genie N=64 a=0.05": -12.911,
+      "cell-genie N=64 a=0.3": -12.183
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -12.528,
+     "gain_over_lmmse_db": 1.393,
+     "gain_ci95": [
+      1.289,
+      1.488
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -12.161,
+      "cellrot-genie N=16 a=0.3": -11.783,
+      "cellrot-genie N=64 a=0.05": -12.528,
+      "cellrot-genie N=64 a=0.3": -12.012
+     }
+    }
+   },
+   "20": {
+    "lmmse": {
+     "nmse_db": -20.259,
+     "rho": 0.0
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -20.655,
+     "gain_over_lmmse_db": 0.396,
+     "gain_ci95": [
+      0.358,
+      0.435
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -20.451,
+      "gmm K=16 a=0.05": -20.57,
+      "gmm K=64 a=0.05": -20.655
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -20.678,
+     "gain_over_lmmse_db": 0.419,
+     "gain_ci95": [
+      0.379,
+      0.46
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -20.54,
+      "cell-genie N=16 a=0.3": -20.417,
+      "cell-genie N=64 a=0.05": -20.678,
+      "cell-genie N=64 a=0.3": -20.483
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -20.552,
+     "gain_over_lmmse_db": 0.293,
+     "gain_ci95": [
+      0.252,
+      0.33
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -20.483,
+      "cellrot-genie N=16 a=0.3": -20.393,
+      "cellrot-genie N=64 a=0.05": -20.552,
+      "cellrot-genie N=64 a=0.3": -20.441
+     }
+    }
+   },
+   "30": {
+    "lmmse": {
+     "nmse_db": -30.11,
+     "rho": 0.0
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -30.159,
+     "gain_over_lmmse_db": 0.049,
+     "gain_ci95": [
+      0.042,
+      0.056
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -30.135,
+      "gmm K=16 a=0.05": -30.15,
+      "gmm K=64 a=0.05": -30.159
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -30.162,
+     "gain_over_lmmse_db": 0.052,
+     "gain_ci95": [
+      0.045,
+      0.059
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -30.145,
+      "cell-genie N=16 a=0.3": -30.13,
+      "cell-genie N=64 a=0.05": -30.162,
+      "cell-genie N=64 a=0.3": -30.138
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -30.143,
+     "gain_over_lmmse_db": 0.033,
+     "gain_ci95": [
+      0.027,
+      0.04
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -30.137,
+      "cellrot-genie N=16 a=0.3": -30.126,
+      "cellrot-genie N=64 a=0.05": -30.143,
+      "cellrot-genie N=64 a=0.3": -30.132
+     }
+    }
+   }
+  },
+  "16ant": {
+   "0": {
+    "lmmse": {
+     "nmse_db": -1.251,
+     "rho": 0.01
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -4.229,
+     "gain_over_lmmse_db": 2.978,
+     "gain_ci95": [
+      2.619,
+      3.306
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -2.809,
+      "gmm K=16 a=0.05": -3.781,
+      "gmm K=64 a=0.05": -4.229
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -5.333,
+     "gain_over_lmmse_db": 4.082,
+     "gain_ci95": [
+      3.866,
+      4.289
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -4.272,
+      "cell-genie N=16 a=0.3": -3.887,
+      "cell-genie N=64 a=0.05": -5.333,
+      "cell-genie N=64 a=0.3": -4.885
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -4.643,
+     "gain_over_lmmse_db": 3.392,
+     "gain_ci95": [
+      3.171,
+      3.601
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -3.571,
+      "cellrot-genie N=16 a=0.3": -3.274,
+      "cellrot-genie N=64 a=0.05": -4.643,
+      "cellrot-genie N=64 a=0.3": -4.282
+     }
+    }
+   },
+   "10": {
+    "lmmse": {
+     "nmse_db": -2.436,
+     "rho": 0.001
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -7.771,
+     "gain_over_lmmse_db": 5.335,
+     "gain_ci95": [
+      5.064,
+      5.62
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -5.34,
+      "gmm K=16 a=0.05": -6.96,
+      "gmm K=64 a=0.05": -7.771
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -8.042,
+     "gain_over_lmmse_db": 5.606,
+     "gain_ci95": [
+      5.388,
+      5.833
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -6.864,
+      "cell-genie N=16 a=0.3": -5.875,
+      "cell-genie N=64 a=0.05": -8.042,
+      "cell-genie N=64 a=0.3": -6.884
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -7.126,
+     "gain_over_lmmse_db": 4.69,
+     "gain_ci95": [
+      4.435,
+      4.939
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -6.077,
+      "cellrot-genie N=16 a=0.3": -5.25,
+      "cellrot-genie N=64 a=0.05": -7.126,
+      "cellrot-genie N=64 a=0.3": -6.217
+     }
+    }
+   },
+   "20": {
+    "lmmse": {
+     "nmse_db": -2.775,
+     "rho": 0.001
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -8.934,
+     "gain_over_lmmse_db": 6.159,
+     "gain_ci95": [
+      5.887,
+      6.456
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -6.157,
+      "gmm K=16 a=0.05": -7.979,
+      "gmm K=64 a=0.05": -8.934
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -9.104,
+     "gain_over_lmmse_db": 6.329,
+     "gain_ci95": [
+      6.048,
+      6.605
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -7.828,
+      "cell-genie N=16 a=0.3": -6.542,
+      "cell-genie N=64 a=0.05": -9.104,
+      "cell-genie N=64 a=0.3": -7.655
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -8.014,
+     "gain_over_lmmse_db": 5.239,
+     "gain_ci95": [
+      4.941,
+      5.527
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -6.983,
+      "cellrot-genie N=16 a=0.3": -5.891,
+      "cellrot-genie N=64 a=0.05": -8.014,
+      "cellrot-genie N=64 a=0.3": -6.88
+     }
+    }
+   },
+   "30": {
+    "lmmse": {
+     "nmse_db": -2.815,
+     "rho": 0.001
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -9.118,
+     "gain_over_lmmse_db": 6.303,
+     "gain_ci95": [
+      6.014,
+      6.607
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -6.269,
+      "gmm K=16 a=0.05": -8.132,
+      "gmm K=64 a=0.05": -9.118
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -9.285,
+     "gain_over_lmmse_db": 6.47,
+     "gain_ci95": [
+      6.177,
+      6.755
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -7.98,
+      "cell-genie N=16 a=0.3": -6.639,
+      "cell-genie N=64 a=0.05": -9.285,
+      "cell-genie N=64 a=0.3": -7.779
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -8.148,
+     "gain_over_lmmse_db": 5.333,
+     "gain_ci95": [
+      5.022,
+      5.636
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -7.112,
+      "cellrot-genie N=16 a=0.3": -5.978,
+      "cellrot-genie N=64 a=0.05": -8.148,
+      "cellrot-genie N=64 a=0.3": -6.98
+     }
+    }
+   }
+  },
+  "8ant": {
+   "0": {
+    "lmmse": {
+     "nmse_db": -0.651,
+     "rho": 0.01
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -2.237,
+     "gain_over_lmmse_db": 1.586,
+     "gain_ci95": [
+      1.25,
+      1.902
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -1.369,
+      "gmm K=16 a=0.05": -1.955,
+      "gmm K=64 a=0.05": -2.237
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -4.128,
+     "gain_over_lmmse_db": 3.477,
+     "gain_ci95": [
+      3.149,
+      3.752
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -3.06,
+      "cell-genie N=16 a=0.3": -2.832,
+      "cell-genie N=64 a=0.05": -4.128,
+      "cell-genie N=64 a=0.3": -3.875
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -3.408,
+     "gain_over_lmmse_db": 2.757,
+     "gain_ci95": [
+      2.459,
+      3.025
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -2.408,
+      "cellrot-genie N=16 a=0.3": -2.241,
+      "cellrot-genie N=64 a=0.05": -3.408,
+      "cellrot-genie N=64 a=0.3": -3.199
+     }
+    }
+   },
+   "10": {
+    "lmmse": {
+     "nmse_db": -1.255,
+     "rho": 0.01
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -5.429,
+     "gain_over_lmmse_db": 4.174,
+     "gain_ci95": [
+      3.729,
+      4.564
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -2.897,
+      "gmm K=16 a=0.05": -4.63,
+      "gmm K=64 a=0.05": -5.429
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -6.533,
+     "gain_over_lmmse_db": 5.278,
+     "gain_ci95": [
+      4.983,
+      5.545
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -5.132,
+      "cell-genie N=16 a=0.3": -4.561,
+      "cell-genie N=64 a=0.05": -6.533,
+      "cell-genie N=64 a=0.3": -5.812
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -5.558,
+     "gain_over_lmmse_db": 4.303,
+     "gain_ci95": [
+      3.989,
+      4.6
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -4.292,
+      "cellrot-genie N=16 a=0.3": -3.843,
+      "cellrot-genie N=64 a=0.05": -5.558,
+      "cellrot-genie N=64 a=0.3": -5.024
+     }
+    }
+   },
+   "20": {
+    "lmmse": {
+     "nmse_db": -1.385,
+     "rho": 0.01
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -6.498,
+     "gain_over_lmmse_db": 5.113,
+     "gain_ci95": [
+      4.714,
+      5.503
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -3.263,
+      "gmm K=16 a=0.05": -5.448,
+      "gmm K=64 a=0.05": -6.498
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -7.361,
+     "gain_over_lmmse_db": 5.976,
+     "gain_ci95": [
+      5.704,
+      6.228
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -5.772,
+      "cell-genie N=16 a=0.3": -5.014,
+      "cell-genie N=64 a=0.05": -7.361,
+      "cell-genie N=64 a=0.3": -6.363
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -6.206,
+     "gain_over_lmmse_db": 4.821,
+     "gain_ci95": [
+      4.499,
+      5.137
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -4.835,
+      "cellrot-genie N=16 a=0.3": -4.251,
+      "cellrot-genie N=64 a=0.05": -6.206,
+      "cellrot-genie N=64 a=0.3": -5.508
+     }
+    }
+   },
+   "30": {
+    "lmmse": {
+     "nmse_db": -1.402,
+     "rho": 0.01
+    },
+    "gmm": {
+     "chosen": "gmm K=64 a=0.05",
+     "nmse_db": -6.633,
+     "gain_over_lmmse_db": 5.231,
+     "gain_ci95": [
+      4.834,
+      5.624
+     ],
+     "all_report_nmse_db": {
+      "gmm K=4 a=0.05": -3.308,
+      "gmm K=16 a=0.05": -5.553,
+      "gmm K=64 a=0.05": -6.633
+     }
+    },
+    "cell-genie": {
+     "chosen": "cell-genie N=64 a=0.05",
+     "nmse_db": -7.484,
+     "gain_over_lmmse_db": 6.082,
+     "gain_ci95": [
+      5.824,
+      6.333
+     ],
+     "all_report_nmse_db": {
+      "cell-genie N=16 a=0.05": -5.858,
+      "cell-genie N=16 a=0.3": -5.071,
+      "cell-genie N=64 a=0.05": -7.484,
+      "cell-genie N=64 a=0.3": -6.437
+     }
+    },
+    "cellrot-genie": {
+     "chosen": "cellrot-genie N=64 a=0.05",
+     "nmse_db": -6.297,
+     "gain_over_lmmse_db": 4.895,
+     "gain_ci95": [
+      4.573,
+      5.213
+     ],
+     "all_report_nmse_db": {
+      "cellrot-genie N=16 a=0.05": -4.904,
+      "cellrot-genie N=16 a=0.3": -4.302,
+      "cellrot-genie N=64 a=0.05": -6.297,
+      "cellrot-genie N=64 a=0.3": -5.571
+     }
+    }
+   }
+  }
+ },
+ "runtime_s": 351.7,
+ "note": "validation run 0056 only (odd 50-snapshot blocks reported, even blocks for selection); test run 0057 untouched; gains are dB better than global-covariance LMMSE, paired block-bootstrap 95% CI; cell-genie uses the true test position and is NOT a usable estimator"
+}
