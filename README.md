@@ -16,7 +16,7 @@
 | ✅ | 全量数据基线：线性、样条、LMMSE（验证集） | `experiments/01_baselines_fulldata/` |
 | ✅ | MLP 变体：3 个随机种子 × 16/8/4 个导频（验证集） | `experiments/02_mlp_fulldata/` |
 | ⬜ | 噪声功率失配、计算成本、可选误码率；最后在测试集上跑一次 | 见 `docs/next_steps.md` |
-| ⬜ | 扩展：天线和频率联合重建（学习方法最有可能真正有用的地方） | 见 `docs/next_steps.md` 第 3 节 |
+| ⬜ | 扩展：天线和频率联合重建。GMM 可行性试跑已完成（2026-11-19），加入天线维度后 GMM 在 0 dB 时比 LMMSE 好 1.5–2.8 dB；正式实验待做 | `experiments/03_gmm_feasibility/`、`docs/next_steps.md` 第 3 节 |
 | ⬜ | 汇报 PPT（12 月 18 日）与最终报告 | `report/` |
 
 具体任务和负责人在 GitHub Issues 里登记，用 Projects 看板跟踪进度。
@@ -65,6 +65,12 @@
 
 **可选扩展（待验证的假设）：** 32 根天线 × 64 个子载波联合重建时，99% 能量对应的线性维数约 28，而主要的物理变量是发射机位置，非线性模型也许有空间。详见 `docs/next_steps.md`。
 
+**扩展的可行性试跑（2026-11-19，验证集）：** 用文献中在实测数据上赢过 LMMSE 的 GMM 估计器做了检验。
+- 在原题目（单天线、64 个子载波）上，GMM 与 LMMSE 只差 0.00–0.02 dB，和 MLP 的结论一致。
+- 在 32 天线去噪和天线 × 频率联合重建中，GMM 在 0 dB 时分别好 2.8 dB 和 1.5 dB，置信区间不含 0。
+
+详见 `experiments/03_gmm_feasibility/README.md`。
+
 ## 试跑得到的关键结论
 
 详见 `experiments/00_pilot_2026-11-06/README.md`。
@@ -86,6 +92,8 @@ tools/                download_dichasus.py（下载）、extract_block.py（抽�
 experiments/          每个阶段一个文件夹，脚本可以独立运行
   00_pilot_2026-11-06/  可行性试跑及复核
   01_baselines_fulldata/ 全量数据基线（验证集）
+  02_mlp_fulldata/       全量数据 MLP 变体（验证集）
+  03_gmm_feasibility/    GMM 可行性试跑：单天线 / 多天线 / 天线 × 频率三种设置（验证集）
 results/              每次正式运行的结果（小文件），规则见 results/README.md
 docs/proposal/        提案（v1 是组员原稿，v2 是提交版）
 report/               最终报告（IEEE 会议模板，main.tex + reference.bib）
