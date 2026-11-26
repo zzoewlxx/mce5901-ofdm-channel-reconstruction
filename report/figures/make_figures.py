@@ -74,7 +74,8 @@ def fig_gain(main, path):
             g = [rows[str(s)][f"{v}@mean_gain_over_lmmse_db"] for s in snrs]
             val = np.array([x["value"] for x in g])
             lo, hi = np.array([x["ci95"][0] for x in g]), np.array([x["ci95"][1] for x in g])
-            ax.errorbar(snrs + off[v], val, yerr=[val - lo, hi - val], capsize=1.2, elinewidth=0.7,
+            yerr = [np.maximum(val - lo, 0), np.maximum(hi - val, 0)]   # 3-decimal records: value may sit on an end
+            ax.errorbar(snrs + off[v], val, yerr=yerr, capsize=1.2, elinewidth=0.7,
                         lw=1.0, ms=3, **style(v))
         ax.set_title(f"{dens} pilots", loc="left")
         ax.set_xticks([0, 10, 20, 30])
@@ -87,18 +88,25 @@ def fig_gain(main, path):
     plt.close(fig)
 
 
-def fig_mismatch(mm, path, dens="16"):
+def mismatch_summary(rec, dens):
+    """Experiment 04's summary of one pilot count, from a 04 record (validation) or an 08 record (test)."""
+    m = rec["metrics"]
+    return m["mismatch"][dens] if "mismatch" in m else {k: m[k][dens] for k in ("offset_loss_db", "fixed_design")}
+
+
+def fig_mismatch(rec, path, dens="16"):
     """(a) loss versus assumed - true SNR; (b) receivers designed for 20 dB, loss versus the true SNR
-    relative to the LMMSE that knows it (Fig. 3, one column; validation run 0056, experiment 04)."""
+    relative to the LMMSE that knows it (Fig. 3, one column)."""
     fig, (a, b) = plt.subplots(1, 2, figsize=(COL_W, 1.9))
-    ol = mm["offset_loss_db"][dens]
+    mm = mismatch_summary(rec, dens)
+    ol = mm["offset_loss_db"]
     for v in ("lmmse", "mlp", "mlp_relweight"):
         a.plot(ol["offsets_db"], ol["vs_own_matched"][v], lw=1.0, ms=3, **style(v))
     a.set_xlabel("Assumed $-$ true SNR (dB)")
     a.set_ylabel("NMSE loss (dB)")
     a.set_xticks([-30, -15, 0, 15, 30])
     a.set_title("(a) wrong SNR", loc="left")
-    fd = mm["fixed_design"][dens]["20"]
+    fd = mm["fixed_design"]["20"]
     snrs = [0, 5, 10, 15, 20, 25, 30]                     # experiment 04's grid (true SNR)
     ref = np.array(fd["lmmse_matched"])
     if len(ref) != len(snrs):
@@ -124,7 +132,7 @@ def fig_mismatch(mm, path, dens="16"):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--main", help="run folder (or run.json) of experiment 08: rehearsal or the test")
-    ap.add_argument("--mismatch", help="run folder (or run.json) of experiment 04")
+    ap.add_argument("--mismatch", help="run folder (or run.json) of experiment 04 (validation version of Fig. 3)")
     ap.add_argument("--out", default=HERE)
     ap.add_argument("--fmt", default="pdf", choices=["pdf", "png"])
     a = ap.parse_args()
@@ -136,9 +144,11 @@ def main():
         info = fig_nmse(rec["metrics"]["main"], os.path.join(a.out, f"fig_nmse_{t}.{a.fmt}"))
         fig_gain(rec["metrics"]["main"], os.path.join(a.out, f"fig_gain_{t}.{a.fmt}"))
         done += [f"fig_nmse_{t}.{a.fmt} ({info})", f"fig_gain_{t}.{a.fmt}"]
-    if a.mismatch:
-        rec = record(a.mismatch)
-        fig_mismatch(rec["metrics"], os.path.join(a.out, f"fig_mismatch_val.{a.fmt}"))
+        if "mismatch" in rec["metrics"]:
+            fig_mismatch(rec, os.path.join(a.out, f"fig_mismatch_{t}.{a.fmt}"))
+            done.append(f"fig_mismatch_{t}.{a.fmt}")
+    if a.mismatch:                                       # experiment 04's record: validation run 0056
+        fig_mismatch(record(a.mismatch), os.path.join(a.out, f"fig_mismatch_val.{a.fmt}"))
         done.append(f"fig_mismatch_val.{a.fmt}")
     print("written to", a.out, ":", "; ".join(done))
 

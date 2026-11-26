@@ -32,6 +32,20 @@
   "patterns": ["32ant x 4sc", "8ant x 4sc"],
   "snrs": [0, 10, 20, 30]
  },
+ "claims": {
+  "primary": {
+   "M1": "64-subcarrier line: for each MLP variant (seed average) in each of 3 densities x 7 SNRs, the paired gain over LMMSE. 'No learned estimator beats LMMSE' holds if no cell has ci_excludes_zero = +1 together with a gain of at least equivalence_margin_db",
+   "J1": "joint setting: the GMM's (seed average) gain over joint LMMSE has ci_excludes_zero = +1 in every one of the 8 rows (2 patterns x 4 SNRs)",
+   "J2": "joint setting: the GMM's gain over each joint MLP (seed averages) has ci_excludes_zero = +1, reported per row; 'in every row' is claimed only if all 16 hold"
+  },
+  "equivalence_margin_db": 0.1,
+  "margin_rule": "a gain whose CI lies inside [-0.1, +0.1] dB is called equal to LMMSE; a CI that excludes 0 by less than 0.1 dB is reported but called practically negligible",
+  "ci_family": "seed averages (@mean) carry the claims; per-seed results are descriptive",
+  "multiplicity": "counts of CIs that exclude zero are descriptive and not adjusted for multiplicity",
+  "block_robustness": "if ci95_200snap and ci95 disagree on a primary claim, the report gives both",
+  "descriptive_only": ["interpolation versus LMMSE", "SNR-mismatch losses (offsets, worst case, fixed design)",
+                       "joint MLPs versus joint LMMSE"]
+ },
  "validation_only": {
   "space32 GMM (experiment 06)": "32-antenna denoising; not part of the report's comparison",
   "position genie (experiment 03)": "uses the true position; a diagnostic, not a receiver",
