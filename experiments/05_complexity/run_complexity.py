@@ -51,8 +51,36 @@ def _threads_arg(argv, default="1"):
     return default
 
 
+def _pin_cpu(argv):
+    """--cpu N: pin this process to logical processor N before numpy is imported (Windows or Linux). This
+    laptop mixes fast and slow cores and the scheduler moves a single-thread job between them, which changed
+    batch times by up to 2x between otherwise identical measurements (README, results). Returns N or None."""
+    for i, x in enumerate(argv):
+        if x == "--cpu" and i + 1 < len(argv):
+            n = int(argv[i + 1])
+            break
+        if x.startswith("--cpu="):
+            n = int(x.split("=", 1)[1])
+            break
+    else:
+        return None
+    if hasattr(os, "sched_setaffinity"):
+        os.sched_setaffinity(0, {n})
+    else:
+        import ctypes
+        k32 = ctypes.windll.kernel32
+        k32.GetCurrentProcess.restype = ctypes.c_void_p
+        k32.SetProcessAffinityMask.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+        if not k32.SetProcessAffinityMask(k32.GetCurrentProcess(), 1 << n):
+            raise SystemExit(f"could not pin the process to logical processor {n}")
+        k32.SetPriorityClass.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+        k32.SetPriorityClass(k32.GetCurrentProcess(), 0x80)   # HIGH_PRIORITY_CLASS: fewer pre-emptions there
+    return n
+
+
 if __name__ == "__main__":
     os.environ["OPENBLAS_NUM_THREADS"] = _threads_arg(sys.argv[1:])
+    PINNED_CPU = _pin_cpu(sys.argv[1:])
 import argparse  # noqa: E402
 import gc  # noqa: E402
 import platform  # noqa: E402
@@ -551,6 +579,9 @@ def main():
     ap.add_argument("--data", default=DEFAULT_NPZ,
                     help="not read: every input is synthetic (accepted so all experiment scripts share one interface)")
     ap.add_argument("--threads", type=int, default=1, help="OpenBLAS threads (set before numpy is imported)")
+    ap.add_argument("--cpu", type=int, default=None,
+                    help="pin the process to this logical processor (and, on Windows, raise its priority class to HIGH) "
+                         "before numpy is imported; use with --threads 1")
     ap.add_argument("--smoke", action="store_true", help="tiny vector / repeat counts; finishes in seconds; not saved")
     ap.add_argument("--settings", nargs="*", default=["freq64", "spacefreq"], choices=["freq64", "spacefreq"])
     ap.add_argument("--methods", nargs="*", default=list(ALL_METHODS), choices=list(ALL_METHODS))
@@ -718,7 +749,8 @@ def main():
         files.append(fig_path)
     except Exception as e:
         log(f"plot failed ({e}); metrics are still saved")
-    config = {"threads": a.threads, "blas": blas, "processor": platform.processor(), "cpu_name": cpu_name(),
+    config = {"threads": a.threads, "pinned_cpu": globals().get("PINNED_CPU"), "blas": blas,
+              "processor": platform.processor(), "cpu_name": cpu_name(),
               "machine": platform.machine(),
               "cpu_count": os.cpu_count(), "numpy": np.__version__, "python": platform.python_version(),
               "settings": a.settings, "methods": a.methods,
