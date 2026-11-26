@@ -18,8 +18,8 @@
 | ✅ | 噪声功率（SNR）失配：真实 × 假设 SNR 网格，3 种导频数（验证集，2026-11-26） | `experiments/04_snr_mismatch/` |
 | ✅ | 扩展：GMM 3 个种子、加宽网格（验证集，2026-11-26） | `experiments/06_gmm_seeds/` |
 | ✅ | 扩展：天线 × 子载波联合 MLP，3 个种子（验证集，2026-11-26） | `experiments/07_joint_mlp/` |
-| ⬜ | 计算成本：脚本已写好，需要在机器空闲时计时 | `experiments/05_complexity/` |
-| ⬜ | 测试集 run 0057 上的唯一一次评估：脚本和验证集演练已完成，待冻结方法清单 | `experiments/08_test_run/` |
+| ✅ | 计算成本：精确乘加次数 + 空闲机器上固定核心的计时（2026-11-26） | `experiments/05_complexity/` |
+| ⬜ | 测试集 run 0057 上的唯一一次评估：方法清单已冻结，三部分验证集演练完全复现（2026-11-26） | `experiments/08_test_run/` |
 | ⬜ | 汇报 PPT（12 月 18 日）与最终报告 | `report/` |
 
 具体任务和负责人在 GitHub Issues 里登记，用 Projects 看板跟踪进度。

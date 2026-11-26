@@ -343,14 +343,18 @@ cases; the blind MLP's gap to matched LMMSE.}
 \end{figure}
 
 \subsection{Computational cost}
-\tbd{Table~\ref{tab:cost}: real MACs per estimate (exact), parameters and measured CPU time per vector
-(batch; one pinned core) at 8 of 64 pilots and for the joint setting at 32$\times$4 pilots. The GMM is given
-with its per-component matrices precomputed.}
+Table~\ref{tab:cost} gives the cost per estimate. The MAC counts are exact; the times come from one run
+on the otherwise idle laptop, and the five repeated batches of every method agree within 25\,\%. With 64
+subcarriers every method needs well under 10\,$\mu$s per vector, and time does not follow MACs: the MLP
+needs 16 times the MACs of LMMSE but only about 7 times its time, because such small products are
+dominated by call overhead. In the joint setting the GMM with $K=64$ needs 64 times the MACs of joint
+LMMSE and about 61 times its time, 0.76\,ms per vector. This assumes its per-component matrices are
+precomputed and stored (8.4 million real parameters); rebuilding them in every single-vector call would take about
+0.27\,s per estimate.
 
 \begin{table}[t]
 \caption{Cost per estimate: real parameters, real MACs as implemented, and CPU time per vector (median
-batch time, one pinned core). 64-subcarrier methods at 8 of 64 pilots; joint methods at 32$\times$4 pilots.
-\tbd{times provisional: measured while the machine was otherwise loaded; re-time when idle}}
+batch time, one pinned core). 64-subcarrier methods at 8 of 64 pilots; joint methods at 32$\times$4 pilots.}
 \label{tab:cost}
 \centering\footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -358,15 +362,15 @@ batch time, one pinned core). 64-subcarrier methods at 8 of 64 pilots; joint met
 \toprule
 Method & Parameters & MACs & CPU ($\mu$s)\\
 \midrule
-Linear interpolation & 512 & 2\,048 & 0.9\\
-LMMSE & 1\,152 & 2\,048 & 2.0\\
-MLP $2\times128$ & 33\,264 & 32\,896 & 14.7\\
-LMMSE + residual MLP & 34\,553 & 35\,216 & 20.1\\
+Linear interpolation & 512 & 2\,048 & 0.29\\
+LMMSE & 1\,152 & 2\,048 & 0.57\\
+MLP $2\times128$ & 33\,264 & 32\,896 & 3.9\\
+LMMSE + residual MLP & 34\,553 & 35\,216 & 5.4\\
 \midrule
-Joint LMMSE & 132\,096 & 262\,144 & 20.9\\
-Joint MLP $2\times512$ & 788\,736 & 786\,944 & 69.5\\
-Joint LMMSE + residual MLP & 953\,729 & 1\,114\,880 & 189\\
-GMM, $K=64$ & 8\,388\,672 & 16\,809\,984 & 1\,225\\
+Joint LMMSE & 132\,096 & 262\,144 & 12.4\\
+Joint MLP $2\times512$ & 788\,736 & 786\,944 & 43.5\\
+Joint LMMSE + residual MLP & 953\,729 & 1\,114\,880 & 65.8\\
+GMM, $K=64$ & 8\,388\,672 & 16\,809\,984 & 763\\
 \bottomrule
 \end{tabular}
 \end{table}
