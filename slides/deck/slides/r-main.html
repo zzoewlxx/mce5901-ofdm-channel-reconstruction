@@ -1,0 +1,8 @@
+<section id="r-main" data-transition="fade">
+<p class="eyebrow">RESULT 1 · TEST RUN</p>
+<h2>LMMSE beats linear interpolation by 1.7 to 9.7 dB</h2>
+<img class="fig" src="/_blob/2670573f1bfdda6455dc27b9aef1077f" alt="NMSE versus pilot SNR on the test run for 16, 8 and 4 of 64 pilots. LMMSE and the MLP lie well below linear and spline interpolation; the gap shrinks with fewer pilots and at high SNR." style="width:1440px; height:536px; object-fit:contain">
+<p class="note">Each halving of the pilots costs LMMSE about <b>2.5 dB</b>. The spline is 0.8–1.5 dB worse than linear interpolation: it amplifies the pilot noise more.</p>
+<div class="foot"><p>Group 12 · OFDM channel reconstruction</p><p>6</p></div>
+<aside>First result, on the test run. LMMSE is far better than interpolation: almost 10 dB at 0 dB SNR with 16 pilots, and still 1.7 dB with only 4 pilots at 30 dB. LMMSE averages the noise over all pilots; interpolation only uses the two neighbours. Interestingly the cubic spline is worse than linear interpolation at every SNR, because the channel is very smooth inside the block and the spline just amplifies noise. And the MLP, the dashed line, sits on top of LMMSE. The next slide zooms into that difference. (About 60 seconds.)</aside>
+</section>

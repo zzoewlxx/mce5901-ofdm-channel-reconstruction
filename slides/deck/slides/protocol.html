@@ -1,0 +1,12 @@
+<section id="protocol" data-transition="fade">
+<p class="eyebrow">PROTOCOL</p>
+<h2>A protocol that cannot flatter the learned model</h2>
+<div class="grid2">
+<div class="card"><h3>One global scale</h3><p class="ctext">Normalising each snapshot by its own power leaks the channel norm. In our first check it made the MLP look 1–2 dB better than LMMSE.</p></div>
+<div class="card"><h3>Select and report on different blocks</h3><p class="ctext">Even 50-snapshot blocks of the validation run choose every setting; odd blocks give the reported numbers.</p></div>
+<div class="card"><h3>Paired block bootstrap</h3><p class="ctext">Both methods are scored on the same resampled blocks and the same noise; we report a 95 % interval of the dB difference.</p></div>
+<div class="card"><h3>Frozen before the test</h3><p class="ctext">Methods and the judging rule were fixed first: “better” means the interval excludes zero and the gain is at least 0.1 dB. The test run was evaluated once.</p></div>
+</div>
+<div class="foot"><p>Group 12 · OFDM channel reconstruction</p><p>4</p></div>
+<aside>Most of our effort went into a fair protocol. First, one global scale: when we normalised each snapshot by its true power, the network learned the channel norm for free and looked one to two dB better than LMMSE. That gain disappeared with a fair scale. Second, we never report on the blocks we used for choosing settings. Third, all comparisons are paired, with confidence intervals from a block bootstrap, because neighbouring snapshots are correlated. Fourth, before touching the test run we froze the list of methods and the rule for calling something better. (About 60 seconds.)</aside>
+</section>

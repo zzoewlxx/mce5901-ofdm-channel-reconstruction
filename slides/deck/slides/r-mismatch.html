@@ -1,0 +1,8 @@
+<section id="r-mismatch" data-transition="fade">
+<p class="eyebrow">RESULT 3 · TEST RUN, 16 PILOTS</p>
+<h2>A wrong SNR hurts LMMSE; a blind MLP needs none</h2>
+<img class="figlow" src="/_blob/fe9b122cfec034d627b26fa6461ffd6f" alt="Left: NMSE loss versus assumed minus true SNR; the loss grows to about 17 dB when the SNR is assumed 30 dB too low and to about 3 dB when assumed 30 dB too high. Right: an LMMSE designed for 20 dB loses up to 2.3 dB at other SNRs, while the MLP without SNR input stays close to the matched LMMSE up to 20 dB." style="width:1560px; height:470px; object-fit:contain">
+<p class="note">Assuming the SNR 10 dB too low costs LMMSE 2.1–2.4 dB; 10 dB too high only 0.7 dB. The blind MLP stays within about <b>0.3 dB</b> of the LMMSE that knows the SNR, up to 20 dB.</p>
+<div class="foot"><p>Group 12 · OFDM channel reconstruction</p><p>8</p></div>
+<aside>LMMSE needs the noise power. What if it is wrong? On the left, the loss against the offset between assumed and true SNR. It is asymmetric: assuming too much noise makes the estimator smooth away real signal, which costs up to 17 dB; assuming too little noise only lets more noise through. On the right, an LMMSE designed for 20 dB loses 2.3 dB when the true SNR is 0 dB. The blind MLP, which never sees the SNR, stays within about 0.3 dB of the ideal LMMSE up to 20 dB. So the one real advantage of the MLP in this setting is robustness, not accuracy. (About 60 seconds.)</aside>
+</section>

@@ -1,0 +1,26 @@
+<section id="data" data-transition="fade">
+<p class="eyebrow">DATA</p>
+<h2>Measured channels: DICHASUS dichasus-005x</h2>
+<div class="cols">
+<div class="col">
+<p class="item key">Indoor, <b>non-line-of-sight</b>: a metal barrier blocks the direct path</p>
+<p class="item key"><b>32 receive antennas</b>, 1024 OFDM subcarriers, 50 MHz at 1.272 GHz</p>
+<p class="item key">Transmitter on a robot, five runs through one room</p>
+<p class="item">We keep a 64-subcarrier block (3.1 MHz) and add synthetic noise to the pilots</p>
+<p class="item">0.4 % of the vectors are pure noise and are screened out from the CSI itself</p>
+</div>
+<div class="col">
+<div class="tablewrap">
+<table>
+<tr><th style="width:28%; text-align:left">Use</th><th style="width:28%; text-align:left">Runs</th><th style="width:22%; text-align:right">Snapshots</th><th style="width:22%; text-align:right">Vectors</th></tr>
+<tr><td>Training</td><td>0053–0055</td><td style="text-align:right">15,940</td><td style="text-align:right">507,853</td></tr>
+<tr><td>Validation</td><td>0056</td><td style="text-align:right">5,220</td><td style="text-align:right">166,373</td></tr>
+<tr><td>Test (once)</td><td>0057</td><td style="text-align:right">5,001</td><td style="text-align:right">159,400</td></tr>
+</table>
+</div>
+<p class="note small soft">Split by run, so neighbouring snapshots never fall into different sets. Each antenna of a snapshot is one 64-subcarrier vector.</p>
+</div>
+</div>
+<div class="foot"><p>Group 12 · OFDM channel reconstruction</p><p>3</p></div>
+<aside>We use the public DICHASUS dataset 005x from the University of Stuttgart: real channel measurements in a room where a metal barrier blocks the line of sight, with 32 receive antennas and 1024 subcarriers. The measured CSI is our ground truth; we add controlled noise to the pilots so that we can sweep the pilot SNR. Three runs are for training, one for validation, and the last run is the test set, which we evaluated exactly once at the very end. (About 50 seconds.)</aside>
+</section>

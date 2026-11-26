@@ -1,0 +1,8 @@
+<section id="r-gain" data-transition="fade">
+<p class="eyebrow">RESULT 2 · TEST RUN</p>
+<h2>No MLP variant beats LMMSE: 0 of 84 settings</h2>
+<img class="fig" src="/_blob/7052e28388656e1d5fa66d6990539950" alt="Gain of four MLP variants over LMMSE versus pilot SNR for 16, 8 and 4 pilots. All gains are at or below zero; the plain and blind MLPs fall to about minus 1 to minus 1.7 dB at 30 dB, and the residual MLP stays at zero." style="width:1320px; height:530px; object-fit:contain">
+<p class="note">All variants are within 0.2 dB up to 15 dB; the plain MLP is 0.9–1.6 dB worse at 30 dB. Why: two eigenmodes carry <b>99.99 %</b> of the block’s energy, so the problem is almost linear.</p>
+<div class="foot"><p>Group 12 · OFDM channel reconstruction</p><p>7</p></div>
+<aside>This is the gain of each MLP variant over LMMSE; positive would mean the MLP is better. Across 4 variants, 3 pilot densities and 7 SNRs, that is 84 settings, and in none of them is an MLP better under our frozen rule. Up to 15 dB they are within 0.2 dB. At high SNR the plain MLP loses about 1 to 1.6 dB: its own approximation error becomes visible. The residual MLP learns a correction of essentially zero. The reason is in the data: inside a 3 MHz block, two eigenmodes of the covariance carry 99.99 percent of the energy. The channel there is almost a two-dimensional linear family, and for that LMMSE with half a million training vectors is already nearly optimal. (About 75 seconds.)</aside>
+</section>

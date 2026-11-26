@@ -1,0 +1,8 @@
+<section id="r-joint" data-transition="fade">
+<p class="eyebrow">RESULT 4 · TEST RUN, JOINT SETTING</p>
+<h2>Across antennas, a learned prior helps</h2>
+<img class="fig" src="/_blob/ab406c46214132eed1e7ea7e5f0bec11" alt="Gain over joint LMMSE versus pilot SNR. With pilots on 8 of 32 antennas the GMM estimator gains 2.9 to 5.9 dB and the joint MLPs 2.2 to 4.9 dB. With pilots on all 32 antennas the GMM gains 2.1 dB at 0 dB falling to 0.2 dB at 30 dB, and the plain joint MLP falls far below LMMSE at high SNR." style="width:1440px; height:536px; object-fit:contain">
+<p class="note">The GMM estimator is better than joint LMMSE in <b>8 of 8</b> settings: +2.9 to +5.9 dB with pilots on 8 antennas. The price: up to 64× the multiply–accumulates, 0.76 ms instead of 12 µs per estimate.</p>
+<div class="foot"><p>Group 12 · OFDM channel reconstruction</p><p>9</p></div>
+<aside>Now the joint setting over 32 antennas. Here the picture changes. With pilots on only 8 of the 32 antennas, joint LMMSE cannot extrapolate to the other antennas, and the Gaussian-mixture estimator gains 3 to almost 6 dB; the joint MLPs gain 2 to 5 dB. With pilots on all antennas the GMM still gains 2 dB at low SNR. The plain joint MLP has an error floor at high SNR; the residual version fixes that. The GMM is better than joint LMMSE in all 8 settings. Two cautions: with pilots on 8 antennas the absolute error is still high, minus 5 to minus 9 dB, and the GMM costs up to 64 times the computation. (About 75 seconds.)</aside>
+</section>

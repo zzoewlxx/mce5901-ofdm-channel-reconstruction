@@ -1,0 +1,12 @@
+<section id="takeaways" class="dark">
+<p class="eyebrow">TAKEAWAYS</p>
+<h2>Learning helps where the channel set is nonlinear and pilots are scarce</h2>
+<div class="take">
+<div class="takerow"><p class="tnum">1</p><p class="ttext">Within a narrow block, <b>use LMMSE</b> with trained statistics: no MLP was better in 84 settings, and LMMSE gained 1.7–9.7 dB over linear interpolation.</p></div>
+<div class="takerow"><p class="tnum">2</p><p class="ttext">If the noise level is unreliable, a <b>blind MLP</b> costs about 0.3 dB or less up to 20 dB.</p></div>
+<div class="takerow"><p class="tnum">3</p><p class="ttext">Across antennas, a <b>GMM estimator</b> gains up to 5.9 dB over joint LMMSE, at up to 64× the computation.</p></div>
+</div>
+<p class="note small" style="margin-top:auto">Limits: one room, synthetic pilot noise, one test trajectory. <br>Code and every result record: github.com/zzoewlxx/mce5901-ofdm-channel-reconstruction</p>
+<div class="foot"><p>Group 12 · OFDM channel reconstruction</p><p>10</p></div>
+<aside>To summarise. One: inside a narrow frequency block the measured channel is almost linear, so LMMSE with good statistics is the right tool and the neural network adds nothing. Two: the network's real benefit is robustness when the noise level is unknown. Three: learning does help in the joint antenna setting, where the set of channels is nonlinear and the pilots leave the channel underdetermined, but at a clear computational cost. Limitations: one room, synthetic noise, and one test trajectory in the same room. Thank you; we are happy to take questions. (About 50 seconds.)</aside>
+</section>
