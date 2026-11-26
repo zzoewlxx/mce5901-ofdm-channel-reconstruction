@@ -1,0 +1,20 @@
+{
+ "v": 5,
+ "createdOnFiles": {"v": 1, "at": "2026-11-27T07:10:00Z"},
+ "lists": "css",
+ "format": {"v": 1, "shared": ["project/deck.css"]},
+ "title": "OFDM Channel Reconstruction from Sparse Noisy Pilots — Group 12 talk",
+ "cover": "cover",
+ "order": ["cover", "question", "data", "protocol", "methods", "r-main", "r-gain", "r-mismatch", "r-joint", "takeaways"],
+ "sections": {
+  "s1": {"description": "The question: when does a learned estimator help over LMMSE on measured channels?", "start": "cover"},
+  "s2": {"description": "Data, a leakage-free protocol and the methods compared.", "start": "data"},
+  "s3": {"description": "Results of the single evaluation on the held-out run.", "start": "r-main"},
+  "s4": {"description": "Takeaways and limitations.", "start": "takeaways"}
+ },
+ "faces": {
+  "space-grotesk": {"family": "Space Grotesk", "href": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@400;600&display=swap"},
+  "inter": {"family": "Inter", "href": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@400;600&display=swap"}
+ },
+ "designSystems": []
+}

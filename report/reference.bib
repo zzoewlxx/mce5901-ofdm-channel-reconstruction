@@ -1,147 +1,86 @@
 % Encoding: UTF-8
+% Sources of the metadata (checked 2026-11-26):
+%   coleri2002, edfors1998, soltani2019, li2020: proposal references (docs/proposal/build/build_proposal.py);
+%     titles and authors confirmed in the reference lists of arXiv:2306.13761v2 and arXiv:2506.00452 (arxiv.org/html).
+%   euchner2021data, euchner2021sounder: README.md (section "数据集与引用").
+%   turan2022: arXiv:2207.14150 abstract page; venue (ISWCS 2022, pp. 1-6) from the reference list of arXiv:2312.03450v2.
+%   baur2024: arXiv:2312.03450 abstract page (comments: accepted at WSA 2024; DOI listed there).
+%   feriani2023: arXiv:2306.13761 abstract page.
 
-@article{5G,
-	author    = {Jeffrey G. Andrews and
-	Stefano Buzzi and
-	Wan Choi and
-	Stephen V. Hanly and
-	Angel E. Lozano and
-	Anthony C. K. Soong and
-	Jianzhong (Charlie) Zhang},
-	title     = {What Will 5G Be?},
-	journal   = {{IEEE} J. Sel. Areas Commun.},
-	volume    = {32},
-	number    = {6},
-	pages     = {1065--1082},
-	year      = {2014},
+@article{coleri2002,
+  author  = {S. Coleri and M. Ergen and A. Puri and A. Bahai},
+  title   = {Channel estimation techniques based on pilot arrangement in {OFDM} systems},
+  journal = {IEEE Trans. Broadcast.},
+  volume  = {48},
+  number  = {3},
+  pages   = {223--229},
+  year    = {2002}
 }
 
-@article{6G,
-	author    = {Khaled Ben Letaief and
-	Wei Chen and
-	Yuanming Shi and
-	Jun Zhang and
-	Ying{-}Jun Angela Zhang},
-	title     = {The Roadmap to 6G: {AI} Empowered Wireless Networks},
-	journal   = {{IEEE} Commun. Mag.},
-	volume    = {57},
-	number    = {8},
-	pages     = {84--90},
-	year      = {2019},
+@article{edfors1998,
+  author  = {O. Edfors and M. Sandell and J.-J. van de Beek and S. Wilson and P. B{\"o}rjesson},
+  title   = {{OFDM} channel estimation by singular value decomposition},
+  journal = {IEEE Trans. Commun.},
+  volume  = {46},
+  number  = {7},
+  pages   = {931--939},
+  year    = {1998}
 }
 
-@INPROCEEDINGS{routingForDelay,
-	author={Xie, Hengheng and De Grande, Robson and Boukerche, Azzedine},
-	booktitle={2016 IEEE International Conference on Communications (ICC)}, 
-	title={Cross layer optimization for routing based on link layer delay analysis}, 
-	year={2016},
-	volume={},
-	number={},
-	pages={1-6},
-	doi={10.1109/ICC.2016.7511233}
+@article{soltani2019,
+  author  = {M. Soltani and V. Pourahmadi and A. Mirzaei and H. Sheikhzadeh},
+  title   = {Deep learning-based channel estimation},
+  journal = {IEEE Commun. Lett.},
+  volume  = {23},
+  number  = {4},
+  pages   = {652--655},
+  year    = {2019}
 }
 
-@article{multipathPartI,
-	author = {Tsirigos, Aristotelis and Zygmunt, Haas},
-	year = {2004},
-	month = {02},
-	pages = {138 - 146},
-	title = {Analysis of Multipath Routing---Part {I}: The Effect on the Packet Delivery Ratio},
-	volume = {3},
-	journal = {IEEE Transactions on Wireless Communications},
-	doi = {10.1109/TWC.2003.821207}
+@article{li2020,
+  author  = {L. Li and H. Chen and H.-H. Chang and L. Liu},
+  title   = {Deep residual learning meets {OFDM} channel estimation},
+  journal = {IEEE Wireless Commun. Lett.},
+  volume  = {9},
+  number  = {5},
+  pages   = {615--618},
+  year    = {2020}
 }
 
-@article{multipathPartII,
-	author = {Tsirigos, Aristotelis and Zygmunt, Haas},
-	year = {2004},
-	month = {04},
-	pages = {500 - 511},
-	title = {Analysis of Multipath Routing, Part 2: Mitigation of the Effects of Frequently Changing Network Topologies},
-	volume = {3},
-	journal = {IEEE Transactions on Wireless Communications},
-	doi = {10.1109/TWC.2004.825355}
+@inproceedings{euchner2021sounder,
+  author    = {F. Euchner and M. Gauger and S. D{\"o}rner and S. ten Brink},
+  title     = {A distributed massive {MIMO} channel sounder for ``big {CSI} data''-driven machine learning},
+  booktitle = {Proc. Int. ITG Workshop Smart Antennas (WSA)},
+  year      = {2021}
 }
 
-@inproceedings{ChaiZ19,
-	author    = {Yuan Chai and
-	Xiao{-}Jun Zeng},
-	title     = {An Effective Routing with Delay Minimization for Multi-Hop Wireless
-	Mesh Network},
-	booktitle = {2019 {IEEE} Global Communications Conference, {GLOBECOM} 2019, Waikoloa,
-	HI, USA, December 9-13, 2019},
-	pages     = {1-6},
-	publisher = {{IEEE}},
-	year      = {2019},
+@misc{euchner2021data,
+  author       = {F. Euchner and M. Gauger},
+  title        = {{CSI} dataset dichasus-005x: Indoor non-line of sight, single room},
+  howpublished = {DaRUS, CC BY 4.0, doi: 10.18419/darus-2204},
+  year         = {2021}
 }
 
-@article{Park97,
-	author = {Park, Vincent and Corson, M.},
-	year = {1998},
-	month = {09},
-	pages = {1405--1413},
-	title = {A Highly Adaptive Distributed Routing Algorithm for Mobile Wireless Networks},
-	volume = {3},
-	journal = {Proc. 16th Annual Joint Conf. of IEEE Computer and Commun. Societies (INFOCOM '97) (Kobe, Japan}
+@inproceedings{turan2022,
+  author    = {N. Turan and B. Fesl and M. Grundei and M. Koller and W. Utschick},
+  title     = {Evaluation of a {G}aussian mixture model-based channel estimator using measurement data},
+  booktitle = {Proc. Int. Symp. Wireless Commun. Syst. (ISWCS)},
+  pages     = {1--6},
+  year      = {2022},
+  note      = {arXiv:2207.14150}
 }
 
-@inproceedings{AODV,
-	author = {Lee, Sung-Ju and Gerla, Mario},
-	year = {2000},
-	month = {02},
-	pages = {1311 - 1316},
-	volume = {3},
-	title = {AODV-BR: backup routing in ad hoc networks},
-	isbn = {0-7803-6596-8},
-	journal = {Wireless Communications and Networking Conference},
+@inproceedings{baur2024,
+  author    = {M. Baur and B. B{\"o}ck and N. Turan and W. Utschick},
+  title     = {Variational autoencoder for channel estimation: Real-world measurement insights},
+  booktitle = {Proc. Int. ITG Workshop Smart Antennas (WSA)},
+  year      = {2024},
+  note      = {arXiv:2312.03450}
 }
 
-@inproceedings{Klaus20,
-	author    = {Klaus Schneider and
-	Beichuan Zhang and
-	Lotfi Benmohamed},
-	title     = {Hop-by-Hop Multipath Routing: Choosing the Right Nexthop Set},
-	booktitle = {39th {IEEE} Conference on Computer Communications, {INFOCOM} 2020,
-	Toronto, ON, Canada, July 6-9, 2020},
-	pages     = {2273--2282},
-	publisher = {{IEEE}},
-	year      = {2020},
-}
-
-@article{NadeemSLV21,
-	author    = {Faisal Nadeem and
-	Mahyar Shirvanimoghaddam and
-	Yonghui Li and
-	Branka Vucetic},
-	title     = {Delay-Sensitive {NOMA-HARQ} for Short Packet Communications},
-	journal   = {Entropy},
-	volume    = {23},
-	number    = {7},
-	pages     = {880},
-	year      = {2021},
-}
-
-@article{ChenYYZSL21,
-	author    = {Jiayin Chen and
-	Peng Yang and
-	Qiang Ye and
-	Weihua Zhuang and
-	Xuemin Shen and
-	Xu Li},
-	title     = {Learning-Based Proactive Resource Allocation for Delay-Sensitive Packet
-	Transmission},
-	journal   = {{IEEE} Trans. Cogn. Commun. Netw.},
-	volume    = {7},
-	number    = {2},
-	pages     = {675--688},
-	year      = {2021},
-}
-
-@article{MPTCPEF,
-	title={{TCP} Extensions for Multipath Operation with Multiple Addresses},
-	author={Alan Ford and Costin Raiciu and Mark Handley and Olivier Bonaventure},
-	journal={RFC},
-	year={2013},
-	volume={8684},
-	pages={1-68}
+@misc{feriani2023,
+  author       = {A. Feriani and D. Wu and S. Liu and G. Dudek},
+  title        = {{CeBed}: A benchmark for deep data-driven {OFDM} channel estimation},
+  howpublished = {arXiv:2306.13761},
+  year         = {2023}
 }

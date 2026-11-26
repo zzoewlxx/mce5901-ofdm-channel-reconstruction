@@ -1,0 +1,22 @@
+<section id="methods" data-transition="fade">
+<p class="eyebrow">METHODS</p>
+<h2>What we compare</h2>
+<div class="cols">
+<div class="col">
+<h3>Within a 64-subcarrier block</h3>
+<p class="item">Linear and cubic-spline <b>interpolation</b></p>
+<p class="item key"><b>LMMSE</b> with mean and covariance from the training runs: the reference for every gain</p>
+<p class="item"><b>MLP</b>, 2 × 128 units, four variants: plain, relative-error loss, residual on top of LMMSE, and blind (no SNR input)</p>
+<p class="item">16, 8 or 4 pilots · 0–30 dB · three seeds</p>
+</div>
+<div class="col">
+<h3>Jointly: 32 antennas × 16 subcarriers</h3>
+<p class="item key"><b>Joint LMMSE</b> with the 512 × 512 training covariance</p>
+<p class="item"><b>GMM estimator</b>: a mixture of up to 64 local LMMSE estimators, weighted by how well each explains the pilots</p>
+<p class="item"><b>Joint MLP</b>, 2 × 512 units, plain and residual</p>
+<p class="item">Pilots on 32 or 8 antennas × 4 subcarriers · three seeds</p>
+</div>
+</div>
+<div class="foot"><p>Group 12 · OFDM channel reconstruction</p><p>5</p></div>
+<aside>Within one block of 64 subcarriers we compare interpolation, LMMSE with statistics from the training data, and a small MLP in four variants. The residual variant adds a learned correction to the LMMSE estimate; the blind variant gets no SNR input. As an extension we stack all 32 antennas and reconstruct jointly, a 512-dimensional problem. There we compare joint LMMSE, a Gaussian-mixture estimator from the literature, which is a weighted mixture of local LMMSE estimators, and a larger MLP. (About 60 seconds.)</aside>
+</section>

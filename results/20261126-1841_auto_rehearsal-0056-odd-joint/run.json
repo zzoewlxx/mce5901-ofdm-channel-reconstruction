@@ -1,0 +1,1677 @@
+{
+ "experiment": "rehearsal-0056-odd-joint",
+ "member": "auto",
+ "time": "2026-11-26T18:41:21",
+ "git_commit": "d58ab96",
+ "git_uncommitted_changes": false,
+ "untracked_code": [],
+ "command": "experiments/08_test_run/run_test.py --member auto --run 56 --odd-only --parts joint",
+ "python": "3.12.7",
+ "numpy": "2.1.2",
+ "blas_threads": "4",
+ "platform": "Windows-11-10.0.26200-SP0",
+ "note": "rehearsal of the test code path on validation run 0056",
+ "config": {
+  "run": 56,
+  "odd_only": true,
+  "parts": [
+   "joint"
+  ],
+  "frozen": {
+   "status": "DRAFT - not frozen yet; freeze = commit this file with status FROZEN before the test run",
+   "main": {
+    "baselines_run": "results/20261106-0713_auto_baselines-val",
+    "mlp_runs": [
+     "results/20261126-1204_auto-seed0_mlp-val",
+     "results/20261126-1204_auto-seed1_mlp-val",
+     "results/20261126-1204_auto-seed2_mlp-val"
+    ],
+    "variants": [
+     "mlp",
+     "mlp_relweight",
+     "residual",
+     "mlp_blind"
+    ],
+    "densities": [
+     16,
+     8,
+     4
+    ],
+    "snrs": [
+     0,
+     5,
+     10,
+     15,
+     20,
+     25,
+     30
+    ]
+   },
+   "joint": {
+    "setting": "spacefreq (experiment 03): 32 antennas x 16 subcarriers",
+    "gmm_run": "results/20261126-1653_auto_gmm-seeds-spacefreq",
+    "gmm_seeds": [
+     0,
+     1,
+     2
+    ],
+    "gmm_config": "per seed and row, the (K, alpha) that seed chose on validation; refit must reproduce model_sha256",
+    "mlp_runs": {
+     "32ant x 4sc": "results/20261126-1816_auto-p32_joint-mlp-val",
+     "8ant x 4sc": "results/20261126-1813_auto-p8_joint-mlp-val"
+    },
+    "mlp_variants": [
+     "jmlp",
+     "jresidual"
+    ],
+    "mlp_seeds": [
+     0,
+     1,
+     2
+    ],
+    "patterns": [
+     "32ant x 4sc",
+     "8ant x 4sc"
+    ],
+    "snrs": [
+     0,
+     10,
+     20,
+     30
+    ]
+   },
+   "validation_only": {
+    "space32 GMM (experiment 06)": "32-antenna denoising; not part of the report's comparison",
+    "SNR mismatch (experiment 04)": "robustness study; the matched diagonal is the main-line test",
+    "mlp_wide, early 3x256 network": "not carried forward"
+   }
+  },
+  "bootstrap_B": 2000,
+  "joint_data": {
+   "n_vectors": 2488,
+   "n_blocks": 52,
+   "dim": 512,
+   "n_run_snapshots": 5220,
+   "screened_fraction": 0.0387,
+   "runtime_s": 987.8
+  },
+  "runtime_s": 987.9
+ },
+ "metrics": {
+  "joint": {
+   "32ant x 4sc": {
+    "0": {
+     "lmmse_rho": 0.0,
+     "lmmse": {
+      "nmse_db": -7.91,
+      "ci95": [
+       -8.57,
+       -7.167
+      ]
+     },
+     "jmlp@seed0": {
+      "nmse_db": -8.348,
+      "ci95": [
+       -9.048,
+       -7.578
+      ]
+     },
+     "jmlp@seed1": {
+      "nmse_db": -8.179,
+      "ci95": [
+       -8.88,
+       -7.401
+      ]
+     },
+     "jmlp@seed2": {
+      "nmse_db": -8.291,
+      "ci95": [
+       -8.982,
+       -7.527
+      ]
+     },
+     "jresidual@seed0": {
+      "nmse_db": -8.724,
+      "ci95": [
+       -9.369,
+       -8.013
+      ]
+     },
+     "jresidual@seed1": {
+      "nmse_db": -8.872,
+      "ci95": [
+       -9.487,
+       -8.176
+      ]
+     },
+     "jresidual@seed2": {
+      "nmse_db": -8.874,
+      "ci95": [
+       -9.504,
+       -8.17
+      ]
+     },
+     "gmm@seed0": {
+      "nmse_db": -10.017,
+      "ci95": [
+       -10.677,
+       -9.266
+      ]
+     },
+     "gmm@seed1": {
+      "nmse_db": -10.007,
+      "ci95": [
+       -10.668,
+       -9.267
+      ]
+     },
+     "gmm@seed2": {
+      "nmse_db": -10.013,
+      "ci95": [
+       -10.67,
+       -9.27
+      ]
+     },
+     "gmm@mean": {
+      "nmse_db": -10.012,
+      "ci95": [
+       -10.671,
+       -9.27
+      ]
+     },
+     "jmlp@mean": {
+      "nmse_db": -8.272,
+      "ci95": [
+       -8.966,
+       -7.504
+      ]
+     },
+     "jresidual@mean": {
+      "nmse_db": -8.823,
+      "ci95": [
+       -9.451,
+       -8.115
+      ]
+     },
+     "jmlp@seed0_gain_over_lmmse_db": {
+      "value": 0.438,
+      "ci95": [
+       0.358,
+       0.524
+      ]
+     },
+     "jmlp@seed1_gain_over_lmmse_db": {
+      "value": 0.269,
+      "ci95": [
+       0.182,
+       0.364
+      ]
+     },
+     "jmlp@seed2_gain_over_lmmse_db": {
+      "value": 0.381,
+      "ci95": [
+       0.303,
+       0.462
+      ]
+     },
+     "jresidual@seed0_gain_over_lmmse_db": {
+      "value": 0.814,
+      "ci95": [
+       0.728,
+       0.898
+      ]
+     },
+     "jresidual@seed1_gain_over_lmmse_db": {
+      "value": 0.962,
+      "ci95": [
+       0.87,
+       1.053
+      ]
+     },
+     "jresidual@seed2_gain_over_lmmse_db": {
+      "value": 0.964,
+      "ci95": [
+       0.873,
+       1.057
+      ]
+     },
+     "gmm@seed0_gain_over_lmmse_db": {
+      "value": 2.107,
+      "ci95": [
+       2.003,
+       2.218
+      ]
+     },
+     "gmm@seed1_gain_over_lmmse_db": {
+      "value": 2.097,
+      "ci95": [
+       2.003,
+       2.196
+      ]
+     },
+     "gmm@seed2_gain_over_lmmse_db": {
+      "value": 2.103,
+      "ci95": [
+       1.998,
+       2.215
+      ]
+     },
+     "gmm@mean_gain_over_lmmse_db": {
+      "value": 2.102,
+      "ci95": [
+       2.005,
+       2.206
+      ]
+     },
+     "jmlp@mean_gain_over_lmmse_db": {
+      "value": 0.362,
+      "ci95": [
+       0.282,
+       0.448
+      ]
+     },
+     "jresidual@mean_gain_over_lmmse_db": {
+      "value": 0.913,
+      "ci95": [
+       0.824,
+       1.001
+      ]
+     },
+     "gmm@mean_minus_jmlp@mean_db": {
+      "value": 1.74,
+      "ci95": [
+       1.66,
+       1.825
+      ]
+     },
+     "gmm@mean_minus_jresidual@mean_db": {
+      "value": 1.189,
+      "ci95": [
+       1.087,
+       1.298
+      ]
+     }
+    },
+    "10": {
+     "lmmse_rho": 0.0,
+     "lmmse": {
+      "nmse_db": -16.057,
+      "ci95": [
+       -16.756,
+       -15.251
+      ]
+     },
+     "jmlp@seed0": {
+      "nmse_db": -15.886,
+      "ci95": [
+       -16.518,
+       -15.162
+      ]
+     },
+     "jmlp@seed1": {
+      "nmse_db": -15.86,
+      "ci95": [
+       -16.5,
+       -15.131
+      ]
+     },
+     "jmlp@seed2": {
+      "nmse_db": -15.892,
+      "ci95": [
+       -16.524,
+       -15.164
+      ]
+     },
+     "jresidual@seed0": {
+      "nmse_db": -16.197,
+      "ci95": [
+       -16.867,
+       -15.431
+      ]
+     },
+     "jresidual@seed1": {
+      "nmse_db": -16.245,
+      "ci95": [
+       -16.916,
+       -15.491
+      ]
+     },
+     "jresidual@seed2": {
+      "nmse_db": -16.231,
+      "ci95": [
+       -16.902,
+       -15.474
+      ]
+     },
+     "gmm@seed0": {
+      "nmse_db": -16.858,
+      "ci95": [
+       -17.533,
+       -16.079
+      ]
+     },
+     "gmm@seed1": {
+      "nmse_db": -16.851,
+      "ci95": [
+       -17.529,
+       -16.073
+      ]
+     },
+     "gmm@seed2": {
+      "nmse_db": -16.851,
+      "ci95": [
+       -17.527,
+       -16.076
+      ]
+     },
+     "gmm@mean": {
+      "nmse_db": -16.853,
+      "ci95": [
+       -17.528,
+       -16.076
+      ]
+     },
+     "jmlp@mean": {
+      "nmse_db": -15.879,
+      "ci95": [
+       -16.516,
+       -15.146
+      ]
+     },
+     "jresidual@mean": {
+      "nmse_db": -16.224,
+      "ci95": [
+       -16.894,
+       -15.465
+      ]
+     },
+     "jmlp@seed0_gain_over_lmmse_db": {
+      "value": -0.171,
+      "ci95": [
+       -0.25,
+       -0.088
+      ]
+     },
+     "jmlp@seed1_gain_over_lmmse_db": {
+      "value": -0.197,
+      "ci95": [
+       -0.275,
+       -0.12
+      ]
+     },
+     "jmlp@seed2_gain_over_lmmse_db": {
+      "value": -0.165,
+      "ci95": [
+       -0.243,
+       -0.085
+      ]
+     },
+     "jresidual@seed0_gain_over_lmmse_db": {
+      "value": 0.14,
+      "ci95": [
+       0.097,
+       0.184
+      ]
+     },
+     "jresidual@seed1_gain_over_lmmse_db": {
+      "value": 0.188,
+      "ci95": [
+       0.139,
+       0.236
+      ]
+     },
+     "jresidual@seed2_gain_over_lmmse_db": {
+      "value": 0.174,
+      "ci95": [
+       0.122,
+       0.222
+      ]
+     },
+     "gmm@seed0_gain_over_lmmse_db": {
+      "value": 0.801,
+      "ci95": [
+       0.75,
+       0.86
+      ]
+     },
+     "gmm@seed1_gain_over_lmmse_db": {
+      "value": 0.794,
+      "ci95": [
+       0.747,
+       0.849
+      ]
+     },
+     "gmm@seed2_gain_over_lmmse_db": {
+      "value": 0.794,
+      "ci95": [
+       0.744,
+       0.852
+      ]
+     },
+     "gmm@mean_gain_over_lmmse_db": {
+      "value": 0.796,
+      "ci95": [
+       0.748,
+       0.853
+      ]
+     },
+     "jmlp@mean_gain_over_lmmse_db": {
+      "value": -0.178,
+      "ci95": [
+       -0.254,
+       -0.098
+      ]
+     },
+     "jresidual@mean_gain_over_lmmse_db": {
+      "value": 0.167,
+      "ci95": [
+       0.121,
+       0.212
+      ]
+     },
+     "gmm@mean_minus_jmlp@mean_db": {
+      "value": 0.974,
+      "ci95": [
+       0.899,
+       1.051
+      ]
+     },
+     "gmm@mean_minus_jresidual@mean_db": {
+      "value": 0.629,
+      "ci95": [
+       0.578,
+       0.685
+      ]
+     }
+    },
+    "20": {
+     "lmmse_rho": 0.0,
+     "lmmse": {
+      "nmse_db": -24.824,
+      "ci95": [
+       -25.537,
+       -24.01
+      ]
+     },
+     "jmlp@seed0": {
+      "nmse_db": -21.251,
+      "ci95": [
+       -21.712,
+       -20.742
+      ]
+     },
+     "jmlp@seed1": {
+      "nmse_db": -21.267,
+      "ci95": [
+       -21.75,
+       -20.743
+      ]
+     },
+     "jmlp@seed2": {
+      "nmse_db": -21.289,
+      "ci95": [
+       -21.761,
+       -20.775
+      ]
+     },
+     "jresidual@seed0": {
+      "nmse_db": -24.816,
+      "ci95": [
+       -25.529,
+       -24.004
+      ]
+     },
+     "jresidual@seed1": {
+      "nmse_db": -24.808,
+      "ci95": [
+       -25.521,
+       -24.0
+      ]
+     },
+     "jresidual@seed2": {
+      "nmse_db": -24.809,
+      "ci95": [
+       -25.519,
+       -24.0
+      ]
+     },
+     "gmm@seed0": {
+      "nmse_db": -25.206,
+      "ci95": [
+       -25.918,
+       -24.414
+      ]
+     },
+     "gmm@seed1": {
+      "nmse_db": -25.201,
+      "ci95": [
+       -25.912,
+       -24.405
+      ]
+     },
+     "gmm@seed2": {
+      "nmse_db": -25.207,
+      "ci95": [
+       -25.922,
+       -24.413
+      ]
+     },
+     "gmm@mean": {
+      "nmse_db": -25.205,
+      "ci95": [
+       -25.918,
+       -24.412
+      ]
+     },
+     "jmlp@mean": {
+      "nmse_db": -21.269,
+      "ci95": [
+       -21.741,
+       -20.754
+      ]
+     },
+     "jresidual@mean": {
+      "nmse_db": -24.811,
+      "ci95": [
+       -25.521,
+       -24.001
+      ]
+     },
+     "jmlp@seed0_gain_over_lmmse_db": {
+      "value": -3.573,
+      "ci95": [
+       -3.922,
+       -3.225
+      ]
+     },
+     "jmlp@seed1_gain_over_lmmse_db": {
+      "value": -3.557,
+      "ci95": [
+       -3.875,
+       -3.238
+      ]
+     },
+     "jmlp@seed2_gain_over_lmmse_db": {
+      "value": -3.535,
+      "ci95": [
+       -3.872,
+       -3.193
+      ]
+     },
+     "jresidual@seed0_gain_over_lmmse_db": {
+      "value": -0.008,
+      "ci95": [
+       -0.013,
+       -0.003
+      ]
+     },
+     "jresidual@seed1_gain_over_lmmse_db": {
+      "value": -0.016,
+      "ci95": [
+       -0.027,
+       -0.007
+      ]
+     },
+     "jresidual@seed2_gain_over_lmmse_db": {
+      "value": -0.015,
+      "ci95": [
+       -0.024,
+       -0.008
+      ]
+     },
+     "gmm@seed0_gain_over_lmmse_db": {
+      "value": 0.382,
+      "ci95": [
+       0.347,
+       0.422
+      ]
+     },
+     "gmm@seed1_gain_over_lmmse_db": {
+      "value": 0.377,
+      "ci95": [
+       0.344,
+       0.414
+      ]
+     },
+     "gmm@seed2_gain_over_lmmse_db": {
+      "value": 0.383,
+      "ci95": [
+       0.351,
+       0.421
+      ]
+     },
+     "gmm@mean_gain_over_lmmse_db": {
+      "value": 0.381,
+      "ci95": [
+       0.348,
+       0.419
+      ]
+     },
+     "jmlp@mean_gain_over_lmmse_db": {
+      "value": -3.555,
+      "ci95": [
+       -3.889,
+       -3.223
+      ]
+     },
+     "jresidual@mean_gain_over_lmmse_db": {
+      "value": -0.013,
+      "ci95": [
+       -0.018,
+       -0.008
+      ]
+     },
+     "gmm@mean_minus_jmlp@mean_db": {
+      "value": 3.936,
+      "ci95": [
+       3.601,
+       4.258
+      ]
+     },
+     "gmm@mean_minus_jresidual@mean_db": {
+      "value": 0.394,
+      "ci95": [
+       0.361,
+       0.432
+      ]
+     }
+    },
+    "30": {
+     "lmmse_rho": 0.0,
+     "lmmse": {
+      "nmse_db": -33.65,
+      "ci95": [
+       -34.372,
+       -32.839
+      ]
+     },
+     "jmlp@seed0": {
+      "nmse_db": -22.556,
+      "ci95": [
+       -22.94,
+       -22.132
+      ]
+     },
+     "jmlp@seed1": {
+      "nmse_db": -22.538,
+      "ci95": [
+       -22.943,
+       -22.095
+      ]
+     },
+     "jmlp@seed2": {
+      "nmse_db": -22.666,
+      "ci95": [
+       -23.06,
+       -22.234
+      ]
+     },
+     "jresidual@seed0": {
+      "nmse_db": -33.646,
+      "ci95": [
+       -34.368,
+       -32.835
+      ]
+     },
+     "jresidual@seed1": {
+      "nmse_db": -33.635,
+      "ci95": [
+       -34.356,
+       -32.826
+      ]
+     },
+     "jresidual@seed2": {
+      "nmse_db": -33.643,
+      "ci95": [
+       -34.364,
+       -32.833
+      ]
+     },
+     "gmm@seed0": {
+      "nmse_db": -33.817,
+      "ci95": [
+       -34.53,
+       -33.021
+      ]
+     },
+     "gmm@seed1": {
+      "nmse_db": -33.838,
+      "ci95": [
+       -34.555,
+       -33.034
+      ]
+     },
+     "gmm@seed2": {
+      "nmse_db": -33.822,
+      "ci95": [
+       -34.541,
+       -33.022
+      ]
+     },
+     "gmm@mean": {
+      "nmse_db": -33.826,
+      "ci95": [
+       -34.542,
+       -33.023
+      ]
+     },
+     "jmlp@mean": {
+      "nmse_db": -22.586,
+      "ci95": [
+       -22.981,
+       -22.149
+      ]
+     },
+     "jresidual@mean": {
+      "nmse_db": -33.641,
+      "ci95": [
+       -34.363,
+       -32.831
+      ]
+     },
+     "jmlp@seed0_gain_over_lmmse_db": {
+      "value": -11.094,
+      "ci95": [
+       -11.567,
+       -10.589
+      ]
+     },
+     "jmlp@seed1_gain_over_lmmse_db": {
+      "value": -11.112,
+      "ci95": [
+       -11.543,
+       -10.658
+      ]
+     },
+     "jmlp@seed2_gain_over_lmmse_db": {
+      "value": -10.984,
+      "ci95": [
+       -11.448,
+       -10.502
+      ]
+     },
+     "jresidual@seed0_gain_over_lmmse_db": {
+      "value": -0.004,
+      "ci95": [
+       -0.005,
+       -0.003
+      ]
+     },
+     "jresidual@seed1_gain_over_lmmse_db": {
+      "value": -0.015,
+      "ci95": [
+       -0.019,
+       -0.011
+      ]
+     },
+     "jresidual@seed2_gain_over_lmmse_db": {
+      "value": -0.007,
+      "ci95": [
+       -0.008,
+       -0.006
+      ]
+     },
+     "gmm@seed0_gain_over_lmmse_db": {
+      "value": 0.167,
+      "ci95": [
+       0.142,
+       0.192
+      ]
+     },
+     "gmm@seed1_gain_over_lmmse_db": {
+      "value": 0.188,
+      "ci95": [
+       0.161,
+       0.22
+      ]
+     },
+     "gmm@seed2_gain_over_lmmse_db": {
+      "value": 0.172,
+      "ci95": [
+       0.147,
+       0.196
+      ]
+     },
+     "gmm@mean_gain_over_lmmse_db": {
+      "value": 0.176,
+      "ci95": [
+       0.151,
+       0.201
+      ]
+     },
+     "jmlp@mean_gain_over_lmmse_db": {
+      "value": -11.064,
+      "ci95": [
+       -11.515,
+       -10.586
+      ]
+     },
+     "jresidual@mean_gain_over_lmmse_db": {
+      "value": -0.009,
+      "ci95": [
+       -0.01,
+       -0.007
+      ]
+     },
+     "gmm@mean_minus_jmlp@mean_db": {
+      "value": 11.24,
+      "ci95": [
+       10.773,
+       11.682
+      ]
+     },
+     "gmm@mean_minus_jresidual@mean_db": {
+      "value": 0.185,
+      "ci95": [
+       0.16,
+       0.209
+      ]
+     }
+    }
+   },
+   "8ant x 4sc": {
+    "0": {
+     "lmmse_rho": 0.01,
+     "lmmse": {
+      "nmse_db": -1.79,
+      "ci95": [
+       -2.128,
+       -1.432
+      ]
+     },
+     "jmlp@seed0": {
+      "nmse_db": -4.046,
+      "ci95": [
+       -4.636,
+       -3.373
+      ]
+     },
+     "jmlp@seed1": {
+      "nmse_db": -4.044,
+      "ci95": [
+       -4.646,
+       -3.372
+      ]
+     },
+     "jmlp@seed2": {
+      "nmse_db": -4.027,
+      "ci95": [
+       -4.624,
+       -3.348
+      ]
+     },
+     "jresidual@seed0": {
+      "nmse_db": -4.066,
+      "ci95": [
+       -4.64,
+       -3.397
+      ]
+     },
+     "jresidual@seed1": {
+      "nmse_db": -4.083,
+      "ci95": [
+       -4.672,
+       -3.414
+      ]
+     },
+     "jresidual@seed2": {
+      "nmse_db": -4.084,
+      "ci95": [
+       -4.669,
+       -3.412
+      ]
+     },
+     "gmm@seed0": {
+      "nmse_db": -4.775,
+      "ci95": [
+       -5.416,
+       -4.06
+      ]
+     },
+     "gmm@seed1": {
+      "nmse_db": -4.764,
+      "ci95": [
+       -5.411,
+       -4.064
+      ]
+     },
+     "gmm@seed2": {
+      "nmse_db": -4.757,
+      "ci95": [
+       -5.406,
+       -4.045
+      ]
+     },
+     "gmm@mean": {
+      "nmse_db": -4.765,
+      "ci95": [
+       -5.408,
+       -4.054
+      ]
+     },
+     "jmlp@mean": {
+      "nmse_db": -4.039,
+      "ci95": [
+       -4.636,
+       -3.362
+      ]
+     },
+     "jresidual@mean": {
+      "nmse_db": -4.078,
+      "ci95": [
+       -4.66,
+       -3.409
+      ]
+     },
+     "jmlp@seed0_gain_over_lmmse_db": {
+      "value": 2.256,
+      "ci95": [
+       1.914,
+       2.581
+      ]
+     },
+     "jmlp@seed1_gain_over_lmmse_db": {
+      "value": 2.254,
+      "ci95": [
+       1.908,
+       2.585
+      ]
+     },
+     "jmlp@seed2_gain_over_lmmse_db": {
+      "value": 2.237,
+      "ci95": [
+       1.887,
+       2.562
+      ]
+     },
+     "jresidual@seed0_gain_over_lmmse_db": {
+      "value": 2.276,
+      "ci95": [
+       1.943,
+       2.591
+      ]
+     },
+     "jresidual@seed1_gain_over_lmmse_db": {
+      "value": 2.293,
+      "ci95": [
+       1.932,
+       2.627
+      ]
+     },
+     "jresidual@seed2_gain_over_lmmse_db": {
+      "value": 2.294,
+      "ci95": [
+       1.955,
+       2.616
+      ]
+     },
+     "gmm@seed0_gain_over_lmmse_db": {
+      "value": 2.985,
+      "ci95": [
+       2.587,
+       3.376
+      ]
+     },
+     "gmm@seed1_gain_over_lmmse_db": {
+      "value": 2.974,
+      "ci95": [
+       2.587,
+       3.373
+      ]
+     },
+     "gmm@seed2_gain_over_lmmse_db": {
+      "value": 2.967,
+      "ci95": [
+       2.58,
+       3.357
+      ]
+     },
+     "gmm@mean_gain_over_lmmse_db": {
+      "value": 2.975,
+      "ci95": [
+       2.587,
+       3.368
+      ]
+     },
+     "jmlp@mean_gain_over_lmmse_db": {
+      "value": 2.249,
+      "ci95": [
+       1.901,
+       2.575
+      ]
+     },
+     "jresidual@mean_gain_over_lmmse_db": {
+      "value": 2.288,
+      "ci95": [
+       1.946,
+       2.609
+      ]
+     },
+     "gmm@mean_minus_jmlp@mean_db": {
+      "value": 0.726,
+      "ci95": [
+       0.636,
+       0.832
+      ]
+     },
+     "gmm@mean_minus_jresidual@mean_db": {
+      "value": 0.687,
+      "ci95": [
+       0.591,
+       0.803
+      ]
+     }
+    },
+    "10": {
+     "lmmse_rho": 0.001,
+     "lmmse": {
+      "nmse_db": -2.368,
+      "ci95": [
+       -2.735,
+       -1.976
+      ]
+     },
+     "jmlp@seed0": {
+      "nmse_db": -6.774,
+      "ci95": [
+       -7.408,
+       -6.078
+      ]
+     },
+     "jmlp@seed1": {
+      "nmse_db": -6.711,
+      "ci95": [
+       -7.339,
+       -6.018
+      ]
+     },
+     "jmlp@seed2": {
+      "nmse_db": -6.726,
+      "ci95": [
+       -7.354,
+       -6.026
+      ]
+     },
+     "jresidual@seed0": {
+      "nmse_db": -6.878,
+      "ci95": [
+       -7.514,
+       -6.171
+      ]
+     },
+     "jresidual@seed1": {
+      "nmse_db": -6.878,
+      "ci95": [
+       -7.516,
+       -6.169
+      ]
+     },
+     "jresidual@seed2": {
+      "nmse_db": -6.852,
+      "ci95": [
+       -7.483,
+       -6.154
+      ]
+     },
+     "gmm@seed0": {
+      "nmse_db": -7.035,
+      "ci95": [
+       -7.662,
+       -6.314
+      ]
+     },
+     "gmm@seed1": {
+      "nmse_db": -7.037,
+      "ci95": [
+       -7.649,
+       -6.34
+      ]
+     },
+     "gmm@seed2": {
+      "nmse_db": -7.003,
+      "ci95": [
+       -7.613,
+       -6.305
+      ]
+     },
+     "gmm@mean": {
+      "nmse_db": -7.025,
+      "ci95": [
+       -7.641,
+       -6.321
+      ]
+     },
+     "jmlp@mean": {
+      "nmse_db": -6.737,
+      "ci95": [
+       -7.365,
+       -6.039
+      ]
+     },
+     "jresidual@mean": {
+      "nmse_db": -6.869,
+      "ci95": [
+       -7.502,
+       -6.169
+      ]
+     },
+     "jmlp@seed0_gain_over_lmmse_db": {
+      "value": 4.406,
+      "ci95": [
+       4.008,
+       4.794
+      ]
+     },
+     "jmlp@seed1_gain_over_lmmse_db": {
+      "value": 4.343,
+      "ci95": [
+       3.941,
+       4.738
+      ]
+     },
+     "jmlp@seed2_gain_over_lmmse_db": {
+      "value": 4.358,
+      "ci95": [
+       3.962,
+       4.735
+      ]
+     },
+     "jresidual@seed0_gain_over_lmmse_db": {
+      "value": 4.51,
+      "ci95": [
+       4.105,
+       4.903
+      ]
+     },
+     "jresidual@seed1_gain_over_lmmse_db": {
+      "value": 4.51,
+      "ci95": [
+       4.099,
+       4.905
+      ]
+     },
+     "jresidual@seed2_gain_over_lmmse_db": {
+      "value": 4.484,
+      "ci95": [
+       4.099,
+       4.857
+      ]
+     },
+     "gmm@seed0_gain_over_lmmse_db": {
+      "value": 4.667,
+      "ci95": [
+       4.262,
+       5.057
+      ]
+     },
+     "gmm@seed1_gain_over_lmmse_db": {
+      "value": 4.669,
+      "ci95": [
+       4.287,
+       5.044
+      ]
+     },
+     "gmm@seed2_gain_over_lmmse_db": {
+      "value": 4.635,
+      "ci95": [
+       4.259,
+       5.002
+      ]
+     },
+     "gmm@mean_gain_over_lmmse_db": {
+      "value": 4.657,
+      "ci95": [
+       4.272,
+       5.031
+      ]
+     },
+     "jmlp@mean_gain_over_lmmse_db": {
+      "value": 4.369,
+      "ci95": [
+       3.972,
+       4.759
+      ]
+     },
+     "jresidual@mean_gain_over_lmmse_db": {
+      "value": 4.501,
+      "ci95": [
+       4.098,
+       4.889
+      ]
+     },
+     "gmm@mean_minus_jmlp@mean_db": {
+      "value": 0.288,
+      "ci95": [
+       0.218,
+       0.358
+      ]
+     },
+     "gmm@mean_minus_jresidual@mean_db": {
+      "value": 0.156,
+      "ci95": [
+       0.084,
+       0.231
+      ]
+     }
+    },
+    "20": {
+     "lmmse_rho": 0.001,
+     "lmmse": {
+      "nmse_db": -2.621,
+      "ci95": [
+       -2.99,
+       -2.226
+      ]
+     },
+     "jmlp@seed0": {
+      "nmse_db": -7.329,
+      "ci95": [
+       -7.933,
+       -6.663
+      ]
+     },
+     "jmlp@seed1": {
+      "nmse_db": -7.242,
+      "ci95": [
+       -7.854,
+       -6.562
+      ]
+     },
+     "jmlp@seed2": {
+      "nmse_db": -7.277,
+      "ci95": [
+       -7.884,
+       -6.594
+      ]
+     },
+     "jresidual@seed0": {
+      "nmse_db": -7.49,
+      "ci95": [
+       -8.091,
+       -6.823
+      ]
+     },
+     "jresidual@seed1": {
+      "nmse_db": -7.462,
+      "ci95": [
+       -8.057,
+       -6.803
+      ]
+     },
+     "jresidual@seed2": {
+      "nmse_db": -7.466,
+      "ci95": [
+       -8.05,
+       -6.808
+      ]
+     },
+     "gmm@seed0": {
+      "nmse_db": -8.122,
+      "ci95": [
+       -8.664,
+       -7.471
+      ]
+     },
+     "gmm@seed1": {
+      "nmse_db": -8.084,
+      "ci95": [
+       -8.641,
+       -7.443
+      ]
+     },
+     "gmm@seed2": {
+      "nmse_db": -8.068,
+      "ci95": [
+       -8.643,
+       -7.438
+      ]
+     },
+     "gmm@mean": {
+      "nmse_db": -8.091,
+      "ci95": [
+       -8.646,
+       -7.448
+      ]
+     },
+     "jmlp@mean": {
+      "nmse_db": -7.283,
+      "ci95": [
+       -7.888,
+       -6.606
+      ]
+     },
+     "jresidual@mean": {
+      "nmse_db": -7.473,
+      "ci95": [
+       -8.066,
+       -6.81
+      ]
+     },
+     "jmlp@seed0_gain_over_lmmse_db": {
+      "value": 4.708,
+      "ci95": [
+       4.328,
+       5.078
+      ]
+     },
+     "jmlp@seed1_gain_over_lmmse_db": {
+      "value": 4.621,
+      "ci95": [
+       4.235,
+       4.998
+      ]
+     },
+     "jmlp@seed2_gain_over_lmmse_db": {
+      "value": 4.656,
+      "ci95": [
+       4.273,
+       5.029
+      ]
+     },
+     "jresidual@seed0_gain_over_lmmse_db": {
+      "value": 4.869,
+      "ci95": [
+       4.496,
+       5.232
+      ]
+     },
+     "jresidual@seed1_gain_over_lmmse_db": {
+      "value": 4.841,
+      "ci95": [
+       4.466,
+       5.202
+      ]
+     },
+     "jresidual@seed2_gain_over_lmmse_db": {
+      "value": 4.845,
+      "ci95": [
+       4.484,
+       5.19
+      ]
+     },
+     "gmm@seed0_gain_over_lmmse_db": {
+      "value": 5.501,
+      "ci95": [
+       5.133,
+       5.844
+      ]
+     },
+     "gmm@seed1_gain_over_lmmse_db": {
+      "value": 5.463,
+      "ci95": [
+       5.123,
+       5.803
+      ]
+     },
+     "gmm@seed2_gain_over_lmmse_db": {
+      "value": 5.447,
+      "ci95": [
+       5.099,
+       5.782
+      ]
+     },
+     "gmm@mean_gain_over_lmmse_db": {
+      "value": 5.47,
+      "ci95": [
+       5.124,
+       5.805
+      ]
+     },
+     "jmlp@mean_gain_over_lmmse_db": {
+      "value": 4.662,
+      "ci95": [
+       4.28,
+       5.035
+      ]
+     },
+     "jresidual@mean_gain_over_lmmse_db": {
+      "value": 4.852,
+      "ci95": [
+       4.481,
+       5.209
+      ]
+     },
+     "gmm@mean_minus_jmlp@mean_db": {
+      "value": 0.808,
+      "ci95": [
+       0.691,
+       0.924
+      ]
+     },
+     "gmm@mean_minus_jresidual@mean_db": {
+      "value": 0.618,
+      "ci95": [
+       0.514,
+       0.724
+      ]
+     }
+    },
+    "30": {
+     "lmmse_rho": 0.0001,
+     "lmmse": {
+      "nmse_db": -2.742,
+      "ci95": [
+       -3.114,
+       -2.342
+      ]
+     },
+     "jmlp@seed0": {
+      "nmse_db": -7.388,
+      "ci95": [
+       -7.983,
+       -6.728
+      ]
+     },
+     "jmlp@seed1": {
+      "nmse_db": -7.296,
+      "ci95": [
+       -7.895,
+       -6.618
+      ]
+     },
+     "jmlp@seed2": {
+      "nmse_db": -7.325,
+      "ci95": [
+       -7.922,
+       -6.653
+      ]
+     },
+     "jresidual@seed0": {
+      "nmse_db": -7.501,
+      "ci95": [
+       -8.087,
+       -6.843
+      ]
+     },
+     "jresidual@seed1": {
+      "nmse_db": -7.456,
+      "ci95": [
+       -8.033,
+       -6.808
+      ]
+     },
+     "jresidual@seed2": {
+      "nmse_db": -7.469,
+      "ci95": [
+       -8.031,
+       -6.812
+      ]
+     },
+     "gmm@seed0": {
+      "nmse_db": -8.613,
+      "ci95": [
+       -9.174,
+       -7.992
+      ]
+     },
+     "gmm@seed1": {
+      "nmse_db": -8.599,
+      "ci95": [
+       -9.147,
+       -7.982
+      ]
+     },
+     "gmm@seed2": {
+      "nmse_db": -8.58,
+      "ci95": [
+       -9.139,
+       -7.977
+      ]
+     },
+     "gmm@mean": {
+      "nmse_db": -8.597,
+      "ci95": [
+       -9.147,
+       -7.976
+      ]
+     },
+     "jmlp@mean": {
+      "nmse_db": -7.336,
+      "ci95": [
+       -7.933,
+       -6.668
+      ]
+     },
+     "jresidual@mean": {
+      "nmse_db": -7.475,
+      "ci95": [
+       -8.05,
+       -6.816
+      ]
+     },
+     "jmlp@seed0_gain_over_lmmse_db": {
+      "value": 4.646,
+      "ci95": [
+       4.27,
+       5.007
+      ]
+     },
+     "jmlp@seed1_gain_over_lmmse_db": {
+      "value": 4.554,
+      "ci95": [
+       4.167,
+       4.927
+      ]
+     },
+     "jmlp@seed2_gain_over_lmmse_db": {
+      "value": 4.583,
+      "ci95": [
+       4.202,
+       4.951
+      ]
+     },
+     "jresidual@seed0_gain_over_lmmse_db": {
+      "value": 4.759,
+      "ci95": [
+       4.385,
+       5.122
+      ]
+     },
+     "jresidual@seed1_gain_over_lmmse_db": {
+      "value": 4.714,
+      "ci95": [
+       4.342,
+       5.073
+      ]
+     },
+     "jresidual@seed2_gain_over_lmmse_db": {
+      "value": 4.727,
+      "ci95": [
+       4.368,
+       5.072
+      ]
+     },
+     "gmm@seed0_gain_over_lmmse_db": {
+      "value": 5.871,
+      "ci95": [
+       5.514,
+       6.202
+      ]
+     },
+     "gmm@seed1_gain_over_lmmse_db": {
+      "value": 5.857,
+      "ci95": [
+       5.528,
+       6.167
+      ]
+     },
+     "gmm@seed2_gain_over_lmmse_db": {
+      "value": 5.838,
+      "ci95": [
+       5.498,
+       6.154
+      ]
+     },
+     "gmm@mean_gain_over_lmmse_db": {
+      "value": 5.855,
+      "ci95": [
+       5.526,
+       6.169
+      ]
+     },
+     "jmlp@mean_gain_over_lmmse_db": {
+      "value": 4.594,
+      "ci95": [
+       4.212,
+       4.957
+      ]
+     },
+     "jresidual@mean_gain_over_lmmse_db": {
+      "value": 4.733,
+      "ci95": [
+       4.37,
+       5.086
+      ]
+     },
+     "gmm@mean_minus_jmlp@mean_db": {
+      "value": 1.261,
+      "ci95": [
+       1.117,
+       1.4
+      ]
+     },
+     "gmm@mean_minus_jresidual@mean_db": {
+      "value": 1.122,
+      "ci95": [
+       0.986,
+       1.253
+      ]
+     }
+    }
+   }
+  },
+  "joint_gmm_refit_hashes": {
+   "seed0 K=32 a=0.05": {
+    "refit": "2b2d89551c371369",
+    "experiment06": "2b2d89551c371369",
+    "iters": 2
+   },
+   "seed0 K=64 a=0.05": {
+    "refit": "60130b3e168fd921",
+    "experiment06": "60130b3e168fd921",
+    "iters": 2
+   },
+   "seed1 K=32 a=0.05": {
+    "refit": "a5e3ec6f044fdaf5",
+    "experiment06": "a5e3ec6f044fdaf5",
+    "iters": 2
+   },
+   "seed1 K=64 a=0.05": {
+    "refit": "861378d9faec8f38",
+    "experiment06": "861378d9faec8f38",
+    "iters": 2
+   },
+   "seed2 K=32 a=0.05": {
+    "refit": "78efaae7b3cb992e",
+    "experiment06": "78efaae7b3cb992e",
+    "iters": 2
+   },
+   "seed2 K=64 a=0.05": {
+    "refit": "0ca5c86661174f74",
+    "experiment06": "0ca5c86661174f74",
+    "iters": 2
+   }
+  },
+  "rehearsal_joint_max_abs_diff_db": 0.0
+ }
+}

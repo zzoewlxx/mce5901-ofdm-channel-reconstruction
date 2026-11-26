@@ -1,0 +1,210 @@
+{
+ "experiment": "complexity",
+ "member": "auto",
+ "time": "2026-11-26T20:06:45",
+ "git_commit": "0f6719e",
+ "git_uncommitted_changes": false,
+ "untracked_code": [],
+ "command": "experiments/05_complexity/run_complexity.py --member auto --threads 1 --settings spacefreq --methods gmm gmm_pre --spacefreq-pilots 32 --gmm-k-spacefreq 64",
+ "python": "3.12.7",
+ "numpy": "2.1.2",
+ "blas_threads": "1",
+ "platform": "Windows-11-10.0.26200-SP0",
+ "note": "analytic MAC counts and measured CPU time per estimate on synthetic inputs; no data, run 0057 untouched",
+ "config": {
+  "threads": 1,
+  "blas": {
+   "env_OPENBLAS_NUM_THREADS": "1",
+   "name": "scipy-openblas",
+   "version": "0.3.27",
+   "config": "OpenBLAS 0.3.27  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=24",
+   "threads_reported": [
+    1
+   ]
+  },
+  "processor": "Intel64 Family 6 Model 170 Stepping 4, GenuineIntel",
+  "cpu_name": "Intel(R) Core(TM) Ultra 5 125H",
+  "machine": "AMD64",
+  "cpu_count": 18,
+  "numpy": "2.1.2",
+  "python": "3.12.7",
+  "settings": [
+   "spacefreq"
+  ],
+  "methods": [
+   "gmm",
+   "gmm_pre"
+  ],
+  "freq64": {
+   "n": 64,
+   "densities": [
+    16,
+    8,
+    4
+   ],
+   "mlp_hidden": [
+    128,
+    128
+   ],
+   "gmm_k": [
+    16
+   ]
+  },
+  "spacefreq": {
+   "d": 512,
+   "pilots": [
+    32
+   ],
+   "pattern": "antenna stride 32/(pilots/4) x pilot_positions(16, 4); entry = antenna*16 + subcarrier",
+   "gmm_k": [
+    64
+   ],
+   "joint_hidden": [
+    512,
+    512
+   ]
+  },
+  "assumed_snr_db": 10.0,
+  "n_batch": 100000,
+  "chunk": 10000,
+  "repeats": 5,
+  "min_repeats": 3,
+  "batch_budget_s": 300.0,
+  "latency_calls": 1000,
+  "latency_budget_s": 30.0,
+  "latency_warmup": 20,
+  "seed": 0,
+  "inputs": "synthetic: unit complex Gaussian pilots, random SPD covariances (rank 32 + 0.05 I), He-initialised MLP weights; no measured data is read",
+  "counting": "complex x complex = 1 complex MAC = 4 real MACs; complex x real = 2 real; real x real = 1 real; macs_complex = macs_real / 4; a real matrix times complex data counts as complex x complex (numpy promotes it to zgemm); element-wise products at arithmetic cost; not counted: adds, bias, ReLU, exp/log, GMM weight normalisation, snr/30 input scaling, 1j output recombination",
+  "formula_check": {
+   "passed": true,
+   "cases": [
+    "linear n=64 P=16",
+    "linear 2-tap n=64 P=16",
+    "spline n=64 P=16",
+    "spline dense-withheld n=64 P=16",
+    "spline local n=64 P=16",
+    "lmmse n=64 P=16",
+    "lmmse withheld n=64 P=16",
+    "lmmse_ps n=64 P=16",
+    "lmmse_ps withheld n=64 P=16",
+    "mlp n=64 P=16",
+    "residual n=64 P=16",
+    "linear n=64 P=8",
+    "linear 2-tap n=64 P=8",
+    "spline n=64 P=8",
+    "spline dense-withheld n=64 P=8",
+    "spline local n=64 P=8",
+    "lmmse n=64 P=8",
+    "lmmse withheld n=64 P=8",
+    "lmmse_ps n=64 P=8",
+    "lmmse_ps withheld n=64 P=8",
+    "mlp n=64 P=8",
+    "residual n=64 P=8",
+    "linear n=64 P=4",
+    "linear 2-tap n=64 P=4",
+    "spline n=64 P=4",
+    "spline dense-withheld n=64 P=4",
+    "spline local n=64 P=4",
+    "lmmse n=64 P=4",
+    "lmmse withheld n=64 P=4",
+    "lmmse_ps n=64 P=4",
+    "lmmse_ps withheld n=64 P=4",
+    "mlp n=64 P=4",
+    "residual n=64 P=4",
+    "linear n=20 P=5",
+    "linear 2-tap n=20 P=5",
+    "spline n=20 P=5",
+    "spline dense-withheld n=20 P=5",
+    "spline local n=20 P=5",
+    "lmmse n=20 P=5",
+    "lmmse withheld n=20 P=5",
+    "lmmse_ps n=20 P=5",
+    "lmmse_ps withheld n=20 P=5",
+    "mlp n=20 P=5",
+    "residual n=20 P=5",
+    "linear n=13 P=3",
+    "linear 2-tap n=13 P=3",
+    "spline n=13 P=3",
+    "spline dense-withheld n=13 P=3",
+    "spline local n=13 P=3",
+    "lmmse n=13 P=3",
+    "lmmse withheld n=13 P=3",
+    "lmmse_ps n=13 P=3",
+    "lmmse_ps withheld n=13 P=3",
+    "mlp n=13 P=3",
+    "residual n=13 P=3",
+    "mlp 2x128, 16 pilots = 32,896 real MACs",
+    "gmm d=24 P=6 K=3",
+    "gmm_pre d=24 P=6 K=3",
+    "gmm minimal (triangular) d=24 P=6 K=3",
+    "gmm d=64 P=8 K=4",
+    "gmm_pre d=64 P=8 K=4",
+    "gmm minimal (triangular) d=64 P=8 K=4",
+    "gmm d=40 P=10 K=5",
+    "gmm_pre d=40 P=10 K=5",
+    "gmm minimal (triangular) d=40 P=10 K=5",
+    "gmm_pre = mix_estimate on the timed spacefreq P=32 K=64 model (max rel. error 3.8e-15)"
+   ]
+  },
+  "timing_warnings": [],
+  "smoke": false,
+  "runtime_s": 700.0
+ },
+ "metrics": {
+  "spacefreq/32/gmm_k64": {
+   "setting": "spacefreq",
+   "method": "gmm",
+   "pilots": 32,
+   "d": 512,
+   "withheld": 480,
+   "macs_complex": 1132544.0,
+   "macs_real": 4530176,
+   "macs_complex_min": 1018880.0,
+   "macs_real_min": 4075520,
+   "params": 33554496,
+   "params_min": 2031680,
+   "us_per_vector_batch": 1118.0,
+   "us_per_vector_batch_min": 1046.0,
+   "batch_repeats_us": [
+    1046.0,
+    1130.0,
+    1118.0
+   ],
+   "us_latency": 56610.0,
+   "us_latency_p90": 76570.0,
+   "latency_calls": 500,
+   "batch_wall_s": 329.4,
+   "batch_cpu_s": 297.8,
+   "K": 64,
+   "setup_macs_complex_per_call": 39845888.0
+  },
+  "spacefreq/32/gmm_k64_pre": {
+   "setting": "spacefreq",
+   "method": "gmm_pre",
+   "pilots": 32,
+   "d": 512,
+   "withheld": 480,
+   "macs_complex": 1050624.0,
+   "macs_real": 4202496,
+   "macs_complex_min": 1018880.0,
+   "macs_real_min": 4075520,
+   "params": 2097216,
+   "params_min": 2031680,
+   "us_per_vector_batch": 770.4,
+   "us_per_vector_batch_min": 684.0,
+   "batch_repeats_us": [
+    795.6,
+    748.6,
+    684.0,
+    792.2
+   ],
+   "us_latency": 5364.0,
+   "us_latency_p90": 7067.0,
+   "latency_calls": 1000,
+   "batch_wall_s": 302.0,
+   "batch_cpu_s": 267.8,
+   "K": 64
+  }
+ }
+}

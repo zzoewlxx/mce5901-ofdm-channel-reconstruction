@@ -1,0 +1,199 @@
+{
+ "note": "an attempt at THE test on run 0057 started here; commit this folder",
+ "command": "experiments/08_test_run/run_test.py --member auto --run 57 --confirm-test",
+ "run": 57,
+ "odd_only": false,
+ "parts": [
+  "joint",
+  "main",
+  "mismatch"
+ ],
+ "frozen": {
+  "status": "FROZEN",
+  "main": {
+   "baselines_run": "results/20261106-0713_auto_baselines-val",
+   "mlp_runs": [
+    "results/20261126-1204_auto-seed0_mlp-val",
+    "results/20261126-1204_auto-seed1_mlp-val",
+    "results/20261126-1204_auto-seed2_mlp-val"
+   ],
+   "variants": [
+    "mlp",
+    "mlp_relweight",
+    "residual",
+    "mlp_blind"
+   ],
+   "densities": [
+    16,
+    8,
+    4
+   ],
+   "snrs": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    25,
+    30
+   ]
+  },
+  "mismatch": {
+   "validation_run": "results/20261126-1625_auto_snr-mismatch-val",
+   "designs": "LMMSE for assumed SNR a: main.baselines_run loading for a; SNR-aware MLPs get a; mlp_blind ignores it",
+   "variants": [
+    "mlp",
+    "mlp_relweight",
+    "residual",
+    "mlp_blind"
+   ],
+   "densities": [
+    16,
+    8,
+    4
+   ],
+   "snrs": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    25,
+    30
+   ]
+  },
+  "joint": {
+   "setting": "spacefreq (experiment 03): 32 antennas x 16 subcarriers",
+   "gmm_run": "results/20261126-1653_auto_gmm-seeds-spacefreq",
+   "gmm_seeds": [
+    0,
+    1,
+    2
+   ],
+   "gmm_config": "per seed and row, the (K, alpha) that seed chose on validation; refit must reproduce model_sha256",
+   "mlp_runs": {
+    "32ant x 4sc": "results/20261126-1816_auto-p32_joint-mlp-val",
+    "8ant x 4sc": "results/20261126-1813_auto-p8_joint-mlp-val"
+   },
+   "mlp_variants": [
+    "jmlp",
+    "jresidual"
+   ],
+   "mlp_seeds": [
+    0,
+    1,
+    2
+   ],
+   "patterns": [
+    "32ant x 4sc",
+    "8ant x 4sc"
+   ],
+   "snrs": [
+    0,
+    10,
+    20,
+    30
+   ]
+  },
+  "claims": {
+   "rule": "one rule for every gain g (seed averages; positive = better): 'better' iff ci_excludes_zero = +1 and g >= margin; 'significant but negligible' iff ci_excludes_zero = +1 and g < margin (or -1 and g > -margin); 'worse' iff ci_excludes_zero = -1 and g <= -margin; 'equivalent' iff the whole CI lies inside [-margin, +margin]; otherwise 'inconclusive'",
+   "equivalence_margin_db": 0.1,
+   "primary": {
+    "M1": "64-subcarrier line: 'no learned estimator beats LMMSE' holds iff no (variant, density, SNR) cell of the 4 MLP variants x 3 densities x 7 SNRs is 'better' than LMMSE",
+    "J1": "joint setting: 'the GMM beats joint LMMSE' holds in a row iff the GMM's gain over LMMSE is 'better'; claimed for all rows only if all 8 rows (2 patterns x 4 SNRs) hold",
+    "J2": "joint setting: 'the GMM beats joint MLP v' holds in a row iff gmm@mean_gain_over_<v>@mean_db is 'better'; reported per row and claimed for all rows only if all 8 rows hold, for each v"
+   },
+   "ci_family": "seed averages (@mean) carry the claims; per-seed results are descriptive",
+   "multiplicity": "counts of CIs that exclude zero are descriptive and not adjusted for multiplicity",
+   "block_robustness": "if ci95_200snap and ci95 lead to different categories for a primary claim, the report gives both",
+   "descriptive_only": [
+    "interpolation versus LMMSE",
+    "SNR-mismatch losses (offsets, worst case, fixed design)",
+    "joint MLPs versus joint LMMSE"
+   ]
+  },
+  "validation_only": {
+   "space32 GMM (experiment 06)": "32-antenna denoising; not part of the report's comparison",
+   "position genie (experiment 03)": "uses the true position; a diagnostic, not a receiver",
+   "mlp_wide, early 3x256 network": "not carried forward"
+  }
+ },
+ "bootstrap_B": 2000,
+ "merge_for_ci95_200snap": 4,
+ "env": {
+  "python": "3.12.7",
+  "numpy": "2.1.2",
+  "sklearn": "1.9.1",
+  "threadpoolctl": "3.8.0",
+  "openblas_threads": [
+   4
+  ],
+  "openblas_version": [
+   "0.3.27",
+   "0.3.31.dev"
+  ]
+ },
+ "start": {
+  "git_commit": "6551e13fa183a6a6bb111079ab6c081b38173bb3",
+  "time": "2026-11-26T22:03:59",
+  "code_dirty": false,
+  "records_clean": true,
+  "frozen_json_committed_blob": "584fa074b14f28f79cfa71c0d47de9bd4defa459",
+  "frozen_json_clean": true,
+  "data": {
+   "path": "D:\\GIT_PROJECT\\mce5901-ofdm-channel-reconstruction\\data\\processed\\dichasus005x_sc256-319.npz",
+   "bytes": 436315348,
+   "sha256": "4e2638b2188894927b67c6263805178a5e344df979a88050fd0e6c7f959ce966"
+  }
+ },
+ "rehearsal": "results/20261126-2158_auto_rehearsal-0056-odd",
+ "after_failed_attempt": null,
+ "previous_attempts": [],
+ "joint_preflight": {
+  "fits": {
+   "seed0 K=32 a=0.05": {
+    "model_sha256": "2b2d89551c371369",
+    "kmeans_labels_sha256": "fc8b6c51508c8e8c",
+    "kmeans_attempts": 1,
+    "em_iterations": 2,
+    "refit_s": 23.3
+   },
+   "seed0 K=64 a=0.05": {
+    "model_sha256": "60130b3e168fd921",
+    "kmeans_labels_sha256": "00c7306eb37e4290",
+    "kmeans_attempts": 1,
+    "em_iterations": 2,
+    "refit_s": 78.7
+   },
+   "seed1 K=32 a=0.05": {
+    "model_sha256": "a5e3ec6f044fdaf5",
+    "kmeans_labels_sha256": "72f1a2d1252a520a",
+    "kmeans_attempts": 1,
+    "em_iterations": 2,
+    "refit_s": 34.2
+   },
+   "seed1 K=64 a=0.05": {
+    "model_sha256": "861378d9faec8f38",
+    "kmeans_labels_sha256": "7cb3ca61d5583e71",
+    "kmeans_attempts": 1,
+    "em_iterations": 2,
+    "refit_s": 111.1
+   },
+   "seed2 K=32 a=0.05": {
+    "model_sha256": "78efaae7b3cb992e",
+    "kmeans_labels_sha256": "186f7a4f76dcb1eb",
+    "kmeans_attempts": 1,
+    "em_iterations": 2,
+    "refit_s": 57.1
+   },
+   "seed2 K=64 a=0.05": {
+    "model_sha256": "0ca5c86661174f74",
+    "kmeans_labels_sha256": "d892bacd37d7d4e0",
+    "kmeans_attempts": 1,
+    "em_iterations": 2,
+    "refit_s": 108.8
+   }
+  },
+  "runtime_s": 414.9
+ }
+}

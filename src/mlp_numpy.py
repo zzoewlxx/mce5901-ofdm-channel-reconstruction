@@ -5,13 +5,18 @@ Enough for the channel-reconstruction MLP on CPU without installing PyTorch.
     net = MLP([d_in, 128, 128, d_out], seed=0)
     out, cache = net.forward(X)
     net.step(cache, dloss_dout, lr=1e-3)
+    net.save("model.npz", variant="mlp")   # weights + JSON metadata
+    net, meta = MLP.from_file("model.npz")
 """
+import json
+
 import numpy as np
 
 
 class MLP:
     def __init__(self, sizes, seed=0):
         rng = np.random.default_rng(seed)
+        self.sizes = [int(x) for x in sizes]
         self.W, self.b = [], []
         for i, (a, b) in enumerate(zip(sizes[:-1], sizes[1:])):
             gain = 1.0 if i == len(sizes) - 2 else 2.0          # He init for ReLU layers
@@ -59,3 +64,17 @@ class MLP:
     def load(self, state):
         for p, s in zip(self.params, state):
             p[...] = s
+
+    def save(self, path, **meta):
+        """Weights (float64, so a reloaded model predicts exactly the same) and JSON metadata."""
+        arrays = {f"W{i}": W for i, W in enumerate(self.W)}
+        arrays.update({f"b{i}": b for i, b in enumerate(self.b)})
+        np.savez(path, sizes=np.array(self.sizes), meta=np.array(json.dumps(meta, default=str)), **arrays)
+
+    @classmethod
+    def from_file(cls, path):
+        z = np.load(path)
+        net = cls([int(x) for x in z["sizes"]])
+        L = len(net.W)
+        net.load([z[f"W{i}"] for i in range(L)] + [z[f"b{i}"] for i in range(L)])
+        return net, json.loads(str(z["meta"]))

@@ -1,0 +1,12 @@
+<section id="question" data-transition="fade">
+<p class="eyebrow">THE QUESTION</p>
+<h2>When does a learned estimator help over LMMSE?</h2>
+<div class="cards">
+<div class="card"><h3>The task</h3><p class="ctext">A receiver sees noisy pilots on 16, 8 or 4 of 64 subcarriers and must reconstruct the channel on all the others.</p></div>
+<div class="card"><h3>Why it matters</h3><p class="ctext">Every pilot occupies a resource element that could carry data. Better reconstruction means fewer pilots.</p></div>
+<div class="card"><h3>Why measured data</h3><p class="ctext">Learned estimators are mostly reported to win on simulated channels, often against weak baselines.</p></div>
+</div>
+<p class="lead">We vary the pilot SNR (0–30 dB), the pilot density, whether the receiver knows the noise level, and the dimension: frequency only, or antennas and frequency jointly.</p>
+<div class="foot"><p>Group 12 · OFDM channel reconstruction</p><p>2</p></div>
+<aside>A pilot-based receiver only measures the channel at a few subcarriers and has to infer the rest. The classical answer is interpolation or LMMSE. Many papers report that neural networks do better, but mostly on simulated channels. So our research question is: under which conditions does a learned estimator really help over LMMSE? We vary four things: SNR, pilot density, knowledge of the noise level, and whether we reconstruct over frequency only or over antennas and frequency together. (About 50 seconds.)</aside>
+</section>
