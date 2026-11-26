@@ -25,14 +25,15 @@ entries (on all entries when every entry is a pilot). Same noise realisation for
 
     python experiments/03_gmm_feasibility/gmm_feasibility.py --setting space32
 """
-import argparse
-import json
 import os
-import sys
-import time
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "4")   # small inv/slogdet are 50-180x slower with the default
+import argparse  # noqa: E402
+import json  # noqa: E402
+import sys  # noqa: E402
+import time  # noqa: E402
 
-import numpy as np
-from sklearn.cluster import KMeans
+import numpy as np  # noqa: E402
+from sklearn.cluster import KMeans  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))

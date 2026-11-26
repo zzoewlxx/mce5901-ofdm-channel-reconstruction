@@ -6,23 +6,25 @@ Protocol (matches the proposal):
   * fit LMMSE statistics on runs 0053-0055 (all antennas)
   * validation run 0056 is cut into blocks of 50 consecutive snapshots:
       even blocks -> choose the LMMSE diagonal loading, odd blocks -> reported numbers
-  * test run 0057 is NOT used here
+  * test run 0057 is NOT used here (dataset.split_masks refuses it; smoke mode uses one fitting run)
   * one global scale from the training data; pilot SNR relative to average power
   * NMSE (dB) on withheld subcarriers, 95% bootstrap CI over the reported blocks
 
     python experiments/01_baselines_fulldata/run_baselines.py --member <name>
 """
-import argparse
 import os
-import sys
-import tempfile
-import time
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "4")   # default thread count is far slower on small matrices
+import argparse  # noqa: E402
+import sys  # noqa: E402
+import tempfile  # noqa: E402
+import time  # noqa: E402
 
-import numpy as np
+import numpy as np  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(ROOT, "src"))
+from dataset import split_masks  # noqa: E402
 from estimators import (LMMSE, add_noise, channel_stats, linear_matrix, nmse_db,  # noqa: E402
                         pilot_positions, spline_matrix, withheld)
 from runlog import save_run  # noqa: E402
@@ -44,18 +46,14 @@ def main():
     ap.add_argument("--threshold", type=float, default=-30.0)
     ap.add_argument("--block-len", type=int, default=50)
     ap.add_argument("--smoke", action="store_true",
-                    help="code test on a single-run file: first 70%% fit, rest validation; not saved to results/")
+                    help="code test on ONE fitting run: first 70%% fit, rest validation; not saved to results/")
     a = ap.parse_args()
     t_start = time.time()
 
     z = np.load(a.data)
     csi, quality, run, index = z["csi"], z["quality"], z["run"], z["index"]
     n_ant, n = csi.shape[1], csi.shape[2]
-    if a.smoke:
-        cut = np.quantile(index, 0.7)
-        fit_snap, val_snap = index < cut, index >= cut
-    else:
-        fit_snap, val_snap = np.isin(run, a.fit_runs), run == a.val_run
+    fit_snap, val_snap = split_masks(run, index, a.fit_runs, a.val_run, a.smoke)
     keep = quality <= a.threshold                                   # (N, 32)
 
     def vectors(snap_mask):
@@ -74,12 +72,14 @@ def main():
     Hv *= scale
     mu, C = channel_stats(Hf)
 
+    used = fit_snap | val_snap                                      # statistics never include the test run
     summary = {
         "fit_vectors": int(len(Hf)), "val_vectors_select": int(sel.sum()), "val_vectors_report": int(rep.sum()),
         "report_blocks": int(len(rep_blocks)),
         "screened_fraction_by_run": {int(r): round(float(np.mean(quality[run == r] > a.threshold)), 5)
-                                     for r in np.unique(run)},
-        "quality_db_percentiles_1_50_99": np.round(np.percentile(quality, [1, 50, 99]), 2).tolist(),
+                                     for r in np.unique(run[used])},
+        "screened_fraction_fit": round(float(np.mean(quality[fit_snap] > a.threshold)), 5),
+        "quality_db_percentiles_1_50_99": np.round(np.percentile(quality[used], [1, 50, 99]), 2).tolist(),
     }
     print("data:", summary, flush=True)
 

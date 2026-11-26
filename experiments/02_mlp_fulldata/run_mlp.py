@@ -6,18 +6,22 @@ Variants (all take the noisy pilots + pilot SNR and output the withheld subcarri
                   (so high-SNR samples are not drowned out by low-SNR ones)
   residual        2x128 that only learns a correction to the LMMSE estimate
   mlp_wide        3x256, plain MSE (is capacity the limit?)
+  mlp_blind       2x128, plain MSE, NO SNR input (the noise-mismatch experiment needs it)
 Training: pilot SNR ~ U[0,30] dB with fresh noise every batch, Adam, early stopping on the even
 validation blocks; reported on the odd blocks with the SAME noise realizations as experiment 01.
+The best weights of every model are saved (data/runs/<run folder>/<pilots>_<variant>.npz, SHA-256
+in run.json), so later experiments evaluate exactly these models without retraining.
 
-    python experiments/02_mlp_fulldata/run_mlp.py --member <name>
+    python experiments/02_mlp_fulldata/run_mlp.py --member <name> --densities 16 8 4
 """
-import argparse
 import os
-import sys
-import tempfile
-import time
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "4")   # default thread count is far slower on small matrices
+import argparse  # noqa: E402
+import sys  # noqa: E402
+import tempfile  # noqa: E402
+import time  # noqa: E402
 
-import numpy as np
+import numpy as np  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -26,19 +30,17 @@ from dataset import DEFAULT_NPZ, bootstrap_ci, load_split  # noqa: E402
 from estimators import (LMMSE, add_noise, channel_stats, linear_matrix, nmse_db,  # noqa: E402
                         pilot_positions, withheld)
 from mlp_numpy import MLP  # noqa: E402
+from neural import VARIANTS as SPECS, features, load_predictor, make_predictor  # noqa: E402
 from runlog import save_run  # noqa: E402
 
 SNRS = [0, 5, 10, 15, 20, 25, 30]
 VAL_SNRS = [0, 10, 20, 30]
 RHOS = [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
-VARIANTS = {"mlp": ([128, 128], "MLP 2x128 (proposal)", "#2a78d6", "o"),
-            "mlp_relweight": ([128, 128], "MLP 2x128, relative-error weighting", "#eb6834", "s"),
-            "residual": ([128, 128], "LMMSE + residual MLP 2x128", "#1baf7a", "D"),
-            "mlp_wide": ([256, 256, 256], "MLP 3x256", "#eda100", "^")}
-
-
-def features(Y, snr_db):
-    return np.concatenate([Y.real, Y.imag, (np.asarray(snr_db, float) / 30.0)[:, None]], axis=1)
+VARIANTS = {"mlp": ("MLP 2x128 (proposal)", "#2a78d6", "o"),           # legend name, colour, marker
+            "mlp_relweight": ("MLP 2x128, relative-error weighting", "#eb6834", "s"),
+            "residual": ("LMMSE + residual MLP 2x128", "#1baf7a", "D"),
+            "mlp_wide": ("MLP 3x256", "#eda100", "^"),
+            "mlp_blind": ("MLP 2x128, no SNR input", "#7b61c9", "v")}
 
 
 def lmmse_expected_mse(lm, miss, nv):
@@ -50,20 +52,13 @@ def lmmse_expected_mse(lm, miss, nv):
 
 
 def train(variant, d, p, miss, lm, epochs, batch, seed, log):
-    hidden = VARIANTS[variant][0]
+    hidden, snr_input, _ = SPECS[variant]
     rng = np.random.default_rng(seed)
     net = MLP([2 * len(p) + 1] + hidden + [2 * len(miss)], seed=seed)
-    M = len(miss)
     Hf, Hs = d.Hf, d.Hv[d.sel]
     Ysel = {s: add_noise(Hs[:, p], 10 ** (-s / 10), seed=7000 + s) for s in VAL_SNRS}
     lm.apply_per_sample(Hs[:1, p], 1.0)                 # builds the eigen-decomposition
-
-    def predict(Y, s_vec):
-        out = net.predict(features(Y, s_vec))
-        r = out[:, :M] + 1j * out[:, M:]
-        if variant == "residual":
-            r = r + lm.apply_per_sample(Y, 10 ** (-s_vec / 10))[:, miss]
-        return r
+    predict = make_predictor(variant, net, lm, miss)
 
     steps = len(Hf) // batch
     best, best_state, t0 = np.inf, None, time.time()
@@ -79,7 +74,7 @@ def train(variant, d, p, miss, lm, epochs, batch, seed, log):
             T = h[:, miss]
             if variant == "residual":
                 T = T - lm.apply_per_sample(Y, nv)[:, miss]
-            out, cache = net.forward(features(Y, s))
+            out, cache = net.forward(features(Y, s, snr_input))
             diff = out - np.concatenate([T.real, T.imag], axis=1)
             if variant == "mlp_relweight":
                 w = 1 / lmmse_expected_mse(lm, miss, nv)
@@ -90,8 +85,17 @@ def train(variant, d, p, miss, lm, epochs, batch, seed, log):
             best, best_state = val, net.state()
         log(f"    {variant} epoch {ep + 1}/{epochs}: val {val:.3f} dB  ({time.time() - t0:.0f} s)")
     net.load(best_state)
-    return predict, {"best_val_db": round(best, 3), "params": net.n_params(),
-                     "train_s": round(time.time() - t0, 1)}
+    return net, predict, {"best_val_db": round(best, 3), "params": net.n_params(),
+                          "train_s": round(time.time() - t0, 1)}
+
+
+def save_and_check(net, predict, path, lm, miss, Ycheck, meta):
+    """Save the weights, reload them and confirm the reloaded model predicts exactly the same."""
+    net.save(path, **meta)
+    again, _ = load_predictor(path, lm, miss)
+    s = np.linspace(0, 30, len(Ycheck))
+    if not np.array_equal(again(Ycheck, s), predict(Ycheck, s)):
+        raise RuntimeError(f"reloaded model {path} does not reproduce the trained one")
 
 
 def main():
@@ -114,6 +118,7 @@ def main():
     Hs, Hr = d.Hv[d.sel], d.Hv[d.rep]
     boots = np.random.default_rng(0).integers(0, d.n_rep_blocks, (2000, d.n_rep_blocks))
     metrics, train_info = {}, {}
+    weight_dir, artifacts = tempfile.mkdtemp(prefix="mlp_weights_"), []
     for n_obs in a.densities:
         p = pilot_positions(d.n, n_obs)
         miss = withheld(d.n, p)
@@ -121,7 +126,13 @@ def main():
         models = {}
         for v in a.variants:
             log(f"  training {v} for {n_obs} pilots")
-            models[v], train_info[f"{n_obs}_{v}"] = train(v, d, p, miss, lm, a.epochs, a.batch, a.seed, log)
+            net, models[v], train_info[f"{n_obs}_{v}"] = train(v, d, p, miss, lm, a.epochs, a.batch, a.seed, log)
+            path = os.path.join(weight_dir, f"{n_obs}_{v}.npz")
+            save_and_check(net, models[v], path, lm, miss, Hs[:512, p],
+                           dict(variant=v, n_obs=n_obs, pilots=p.tolist(), withheld=miss.tolist(), seed=a.seed,
+                                epochs=a.epochs, batch=a.batch, block=d.block, threshold_db=d.threshold,
+                                scale=d.scale, best_val_db=train_info[f"{n_obs}_{v}"]["best_val_db"]))
+            artifacts.append(path)
         metrics[str(n_obs)] = {}
         Wl = linear_matrix(d.n, p)
         for snr in SNRS:
@@ -155,13 +166,15 @@ def main():
     except Exception as e:
         log(f"plot failed ({e}); metrics are still saved")
     config = {"block": d.block, "threshold_db": d.threshold, "block_len": d.block_len, "densities": a.densities,
-              "variants": {v: VARIANTS[v][0] for v in a.variants}, "epochs": a.epochs, "batch": a.batch,
+              "variants": {v: SPECS[v][0] for v in a.variants},
+              "snr_input": {v: SPECS[v][1] for v in a.variants}, "epochs": a.epochs, "batch": a.batch,
               "seed": a.seed, "snr_train": "U[0,30] dB", "snrs_db": SNRS, "smoke": a.smoke,
               "runtime_s": round(time.time() - t_start, 1)}
     if a.smoke:
-        log(f"smoke test finished; figure {fig_path}")
+        log(f"smoke test finished; figure {fig_path}; weights {weight_dir}")
         return
     save_run("mlp-val", a.member, config, {"nmse": metrics, "training": train_info}, files=files,
+             artifacts=artifacts,
              note="neural estimators vs LMMSE on validation run 0056 (odd blocks); test run 0057 untouched")
 
 
@@ -181,7 +194,7 @@ def plot(metrics, a, path, n_fit):
         ax.axhline(0, color=ink2, linewidth=1.2)
         ax.text(SNRS[0], 0.08, "LMMSE", color=ink2, fontsize=9, va="bottom")
         for v in a.variants:
-            _, name, col, mk = VARIANTS[v]
+            name, col, mk = VARIANTS[v]
             g = [metrics[str(n_obs)][str(s)][f"{v}_gain_over_lmmse_db"] for s in SNRS]
             y = np.array([x["value"] for x in g])
             err = [np.maximum(y - np.array([x["ci95"][0] for x in g]), 0),   # rounding can give -0.001
