@@ -348,21 +348,25 @@ cases; the blind MLP's gap to matched LMMSE.}
 with its per-component matrices precomputed.}
 
 \begin{table}[t]
-\caption{Computational cost per estimate \tbd{values}}
+\caption{Cost per estimate: real parameters, real MACs as implemented, and CPU time per vector (median
+batch time, one pinned core). 64-subcarrier methods at 8 of 64 pilots; joint methods at 32$\times$4 pilots.
+\tbd{times provisional: measured while the machine was otherwise loaded; re-time when idle}}
 \label{tab:cost}
 \centering\footnotesize
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
-Method & Parameters & MACs & CPU ($\mu$s/vector)\\
+Method & Parameters & MACs & CPU ($\mu$s)\
 \midrule
-Linear / spline & -- & -- & --\\
-LMMSE & -- & -- & --\\
-MLP $2\times128$ & -- & -- & --\\
-LMMSE + residual MLP & -- & -- & --\\
-Joint LMMSE & -- & -- & --\\
-GMM ($K=$ [TBD]) & -- & -- & --\\
-Joint MLP & -- & -- & --\\
+Linear interpolation & 512 & 2\,048 & 0.9\
+LMMSE & 1\,152 & 2\,048 & 2.0\
+MLP $2\times128$ & 33\,264 & 32\,896 & 14.7\
+LMMSE + residual MLP & 34\,553 & 35\,216 & 20.1\
+\midrule
+Joint LMMSE & 132\,096 & 262\,144 & 20.9\
+Joint MLP $2\times512$ & 788\,736 & 786\,944 & 69.5\
+Joint LMMSE + residual MLP & 953\,729 & 1\,114\,880 & 189\
+GMM, $K=64$ & 8\,388\,672 & 16\,809\,984 & 1\,225\
 \bottomrule
 \end{tabular}
 \end{table}
