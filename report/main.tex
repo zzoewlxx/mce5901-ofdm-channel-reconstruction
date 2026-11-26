@@ -85,7 +85,7 @@ with three seeds, including noise-power mismatch and computational cost;
 \item an extension to joint reconstruction over antennas and subcarriers: joint LMMSE, a Gaussian-mixture
 (GMM) estimator~\cite{turan2022} and a joint MLP.
 \end{itemize}
-The code and every result record are public: \tbd{repository URL}.
+The code and every result record are public at \url{https://github.com/zzoewlxx/mce5901-ofdm-channel-reconstruction}.
 
 %=====================================================================================================
 \section{Related Work}
@@ -188,7 +188,7 @@ pure noise, and the dataset's SNR field does not identify them. For each (snapsh
 estimate the CSI error from fourth-order differences across frequency over subcarriers 128--893 without
 the DC region, $\hat\varepsilon=\overline{|\Delta^4H_k|^2}/(70\,\overline{|H_k|^2})$, where 70 is the noise gain of
 $\Delta^4$ for white errors and the smooth channel nearly cancels. Vectors with $\hat\varepsilon>-30$\,dB
-are removed (\tbd{screened fraction, runs 0053--0055 only}). (v)~The split is by run
+are removed: 0.44\,\% of the training vectors (runs 0053--0055) and 0.40\,\% of the validation vectors. (v)~The split is by run
 (Table~\ref{tab:data}), so adjacent snapshots never fall into different sets. Each antenna vector of a
 snapshot is one example. The scale $c$, all statistics and all model weights are fitted on the training
 runs only.
@@ -234,9 +234,9 @@ capacity limits the plain MLP. The input is a short vector, not a time--frequenc
 connected networks rather than the CNNs of~\cite{soltani2019,li2020}.
 
 \emph{Joint antenna--frequency extension.} Within the 64-subcarrier block the training covariance is
-concentrated in very few eigenmodes (\tbd{energy fractions, channel-structure analysis of runs
-0053--0056}), leaving little room beyond \eqref{eq:lmmse}. Across the 32 antennas many more eigenmodes
-matter, yet the channel is governed by few physical quantities (transmitter position and orientation): it
+concentrated in very few eigenmodes (the first carries 99.5\,\% of the energy, the first two
+99.99\,\%), leaving little room beyond \eqref{eq:lmmse}. Across the 32 antennas many more eigenmodes
+matter (17, 28 and 43 of 512 for 90, 99 and 99.9\,\% of the joint energy), yet the channel is governed by few physical quantities (transmitter position and orientation): it
 lies near a low-dimensional nonlinear set that one global covariance cannot represent, but a mixture of
 local covariances or a network can. We stack all 32 antennas on 16 of the 64 subcarriers (about every
 fourth) into $N=512$ entries per snapshot (snapshots whose 32 vectors all pass the screening) and place
@@ -244,10 +244,13 @@ pilots on 32 antennas$\times$4 subcarriers or on 8 antennas (every fourth)$\time
 \emph{joint LMMSE} \eqref{eq:lmmse} with the $512\times512$ training covariance; the \emph{GMM estimator}
 \eqref{eq:gmm}, fitted by EM on clean training channels from a $k$-means start, with zero-mean components
 (each snapshot has a random common phase) and shrinkage $\mC_k\leftarrow(1-\alpha)\mC_k+\alpha\mC$,
-$(K,\alpha)$ chosen on the selection blocks (\tbd{final grid}); a \emph{joint MLP} and a joint residual
+$(K,\alpha)$ chosen on the selection blocks among six pairs with $K$ from 8 to 64 and
+$\alpha\in\{0.01,0.05\}$, for each of three $k$-means seeds, with EM run until the mean log-likelihood
+changes by less than $10^{-5}$ (at most 50 iterations); a \emph{joint MLP} and a joint residual
 variant, trained as above with a random common phase per snapshot as augmentation
-(\tbd{architecture}). A \emph{position genie}, one covariance per cell of the true transmitter position,
-is not a receiver; it only shows how much the position structure could offer.
+(two hidden layers of 512 ReLU units, about $7.9\times10^5$ parameters, 150 epochs; the residual
+variant's output layer starts at zero, so training starts from joint LMMSE). The joint LMMSE loading is
+chosen from $\rho\in\{0,10^{-4},10^{-3},10^{-2}\}$ on the selection blocks.
 
 %=====================================================================================================
 \section{Experimental Setup}
@@ -276,15 +279,21 @@ relative to matched LMMSE and its worst case over $t$.
 
 \emph{Complexity.} Per estimate, interpolation and LMMSE cost $|\cM|\,n_p$ complex multiply--accumulates
 (MACs) with a precomputed matrix, the MLP $\sum_\ell d_{\ell-1}d_\ell$ real MACs over its layer widths
-$d_\ell$, and the GMM about $K(n_p^2+Nn_p)$ complex MACs. We also measure the CPU time per vector on one
-laptop CPU (Intel Core Ultra~5 125H) with the BLAS thread count fixed, because the default thread count
-dominates the run time of small matrix operations.
+$d_\ell$, and the GMM about $K(n_p^2+Nn_p)$ complex MACs; these counts are exact and are our primary
+measure. We also measure the CPU time per vector on one laptop CPU (Intel Core Ultra~5 125H) with one BLAS
+thread, the process pinned to the fastest core and given high priority: this CPU mixes fast and slow cores,
+and an unpinned single-thread job moved between them, changing times by up to a factor of two.
 
 \emph{Test run.} After all choices are frozen, one dedicated script evaluates run 0057 \emph{once}, with
-the training scale and the frozen loadings, mixtures and weights; intervals use all test blocks. The odd
-validation blocks, inspected repeatedly during development, cannot replace it, and all numbers in
-Section~\ref{sec:results} come from this run. All code is NumPy-based (scikit-learn only for $k$-means);
-every run is stored with its configuration, metrics, git commit and the SHA-256 of trained weights.
+the training scale and the frozen loadings, mixtures and weights; intervals use all test blocks, and a second
+interval over merged 200-snapshot blocks checks their sensitivity to correlation between neighbouring
+blocks. Before the test we also froze how results are judged: a learned estimator counts as better than
+LMMSE only if its paired interval excludes zero \emph{and} its gain is at least 0.1\,dB. The script refuses
+to run unless a rehearsal of the same code on the validation run reproduced every validation number, and it
+cannot be run a second time. The odd validation blocks, inspected repeatedly during development, cannot
+replace this run, and all numbers in Section~\ref{sec:results} come from it. All code is NumPy-based
+(scikit-learn only for $k$-means); every run is stored with its configuration, metrics, git commit and the
+SHA-256 of trained weights.
 
 %=====================================================================================================
 \section{Results and Discussion}
@@ -319,21 +328,24 @@ residual and blind MLP; mean and range over three seeds.}
 \end{figure}
 
 \subsection{Unknown noise power}
-\tbd{Fig.~\ref{fig:mismatch}: NMSE loss relative to matched LMMSE versus the assumed-minus-true SNR offset,
-for LMMSE, the SNR-aware MLP, the residual variant, the blind MLP and linear interpolation; worst case over
-true SNR 0--30\,dB.}
+\tbd{Fig.~\ref{fig:mismatch} (16 pilots; the other densities in the text): (a) NMSE loss versus the
+assumed-minus-true SNR offset, relative to each method's own matched design, for LMMSE and the SNR-aware
+MLPs (the residual variant equals LMMSE); (b) receivers designed for 20\,dB, loss relative to the LMMSE that
+knows the true SNR, including the blind MLP. Asymmetry of under- versus over-estimating the SNR; worst
+cases; the blind MLP's gap to matched LMMSE.}
 
 \begin{figure}[t]
 \centering
-\figslot{fig_mismatch_test.pdf}{\columnwidth}{1.8in}{NMSE loss vs.\ SNR offset (assumed $-$ true) for
-LMMSE, SNR-aware MLP, residual, blind MLP, linear.}
+\figslot{fig_mismatch_test.pdf}{\columnwidth}{1.9in}{(a) NMSE loss vs.\ SNR offset (assumed $-$ true);
+(b) designs for 20\,dB vs.\ true SNR, incl.\ blind MLP; 16 pilots.}
 \caption{Robustness to a wrong noise-power assumption. \tbd{final caption}}
 \label{fig:mismatch}
 \end{figure}
 
 \subsection{Computational cost}
-\tbd{Table~\ref{tab:cost}: parameters, MACs per estimate and measured CPU time per vector for each
-method at 16, 8 and 4 pilots (fixed BLAS threads).}
+\tbd{Table~\ref{tab:cost}: real MACs per estimate (exact), parameters and measured CPU time per vector
+(batch; one pinned core) at 8 of 64 pilots and for the joint setting at 32$\times$4 pilots. The GMM is given
+with its per-component matrices precomputed.}
 
 \begin{table}[t]
 \caption{Computational cost per estimate \tbd{values}}
@@ -356,28 +368,32 @@ Joint MLP & -- & -- & --\\
 \end{table}
 
 \subsection{Joint antenna--frequency reconstruction}
-\tbd{Table~\ref{tab:joint}: joint LMMSE NMSE and the gains of the GMM estimator and the joint MLP over it,
-with paired 95\,\% CIs, for both pilot patterns at 0/10/20/30\,dB; the position genie as a non-receiver
-reference. Discuss where the gain appears (low SNR, pilots on few antennas) and the absolute error level.}
+\tbd{Table~\ref{tab:joint}: joint LMMSE NMSE, the gains of the GMM estimator, the joint MLP and the
+joint residual MLP over it, and the GMM's paired gain over the joint residual MLP with its 95\,\% interval,
+for both pilot patterns at 0/10/20/30\,dB. Discuss where the gain appears (pilots on few antennas), the
+error floor of the plain joint MLP with dense pilots, and that the GMM's $K$ sits at the edge of the
+validation grid, so its gain is a lower bound.}
 
 \begin{table}[t]
-\caption{Joint setting ($N=512$): NMSE of joint LMMSE and gains over it (dB) \tbd{values}}
+\caption{Joint setting ($N=512$, test run): NMSE of joint LMMSE (dB) and gains over it (dB, positive =
+better; seed averages); last column: the GMM's paired gain over the joint residual MLP with its 95\,\%
+interval \tbd{values}}
 \label{tab:joint}
 \centering\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}lrrrrr@{}}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrrrc@{}}
 \toprule
-Pilots (ant.$\times$sc) & SNR & Joint LMMSE & GMM gain & MLP gain & Genie\\
+Pilots & SNR & LMMSE & GMM & MLP & Res. & GMM $-$ Res.\\
 \midrule
-$32\times4$ & 0  & -- & -- & -- & --\\
-            & 10 & -- & -- & -- & --\\
-            & 20 & -- & -- & -- & --\\
-            & 30 & -- & -- & -- & --\\
+$32\times4$ & 0  & -- & -- & -- & -- & --\\
+            & 10 & -- & -- & -- & -- & --\\
+            & 20 & -- & -- & -- & -- & --\\
+            & 30 & -- & -- & -- & -- & --\\
 \midrule
-$8\times4$  & 0  & -- & -- & -- & --\\
-            & 10 & -- & -- & -- & --\\
-            & 20 & -- & -- & -- & --\\
-            & 30 & -- & -- & -- & --\\
+$8\times4$  & 0  & -- & -- & -- & -- & --\\
+            & 10 & -- & -- & -- & -- & --\\
+            & 20 & -- & -- & -- & -- & --\\
+            & 30 & -- & -- & -- & -- & --\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -385,7 +401,9 @@ $8\times4$  & 0  & -- & -- & -- & --\\
 \subsection{Discussion and limitations}
 \tbd{Answer the research question per setting; when a learned estimator helps and why; limitations: one
 room (training and test runs cover the same area), synthetic pilot noise, error of the reference CSI, no
-time correlation, and the training-set size of the 512-dimensional mixture.}
+time correlation, the training-set size of the 512-dimensional mixture (in 512 dimensions EM never moves
+the $k$-means partition, so the GMM is a partition with one shrunk covariance per cell), and that the
+test intervals cover noise and block sampling within one run, not a different trajectory.}
 
 %=====================================================================================================
 \section{Conclusion}
