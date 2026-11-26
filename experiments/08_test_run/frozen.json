@@ -1,0 +1,14 @@
+{
+ "status": "DRAFT - not frozen yet; freeze = commit this file with status FROZEN before the test run",
+ "main": {
+  "baselines_run": "results/20261106-0713_auto_baselines-val",
+  "mlp_runs": [
+   "results/20261126-1204_auto-seed0_mlp-val",
+   "results/20261126-1204_auto-seed1_mlp-val",
+   "results/20261126-1204_auto-seed2_mlp-val"
+  ],
+  "variants": ["mlp", "mlp_relweight", "residual", "mlp_blind"],
+  "densities": [16, 8, 4],
+  "snrs": [0, 5, 10, 15, 20, 25, 30]
+ }
+}
