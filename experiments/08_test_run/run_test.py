@@ -25,13 +25,17 @@ Full-size dry run on run 56 (all blocks, like the test; no reproduction check is
     python experiments/08_test_run/run_test.py --member <name> --run 56
 The test (once; all parts):
     python experiments/08_test_run/run_test.py --member <name> --run 57 --confirm-test
-It refuses unless: the tree is clean; frozen.json and every record it names are committed and unmodified and
-frozen.json has status FROZEN; a passing three-part odd-block rehearsal exists whose code equals the current
-code (frozen.json's status aside) and whose environment equals the current one; and no earlier attempt
-exists (results/*test-0057*, data/logs/*test-0057*). Before touching run 57 it writes
-results/<stamp>_<member>_test-0057-started/started.json; commit that folder and the final record. A rerun
-after a crashed attempt needs --after-failed-attempt "<reason>", which is written into the record.
-Do not edit or commit in this checkout while the test runs: the record stores the start and end state.
+It refuses unless: no Python code under src/, experiments/, tools/ is uncommitted or untracked; frozen.json
+and every record it names are committed and unmodified, and frozen.json has status FROZEN; a COMMITTED,
+passing three-part odd-block rehearsal exists that started on clean code which did not change while it ran,
+and whose code (*.py), frozen records, frozen choices (frozen.json's main / mismatch / joint sections), data
+file (SHA-256) and environment equal the current ones; no completed test record exists; and no earlier
+attempt exists (results/*test-0057*, data/logs/*test-0057*) unless --after-failed-attempt "<reason>" is
+given, in which case the earlier attempt must have used the same code, frozen choices and data. After the
+pre-flight and before touching run 57 it writes results/<stamp>_<member>_test-0057-started/started.json
+(and crashed.json there if it fails); commit that folder and the final record. Documentation (README.md,
+report) may change between rehearsal and test. Do not commit code while the test runs: the record stores the
+start and end state.
 """
 import os
 os.environ["OPENBLAS_NUM_THREADS"] = "4"   # every frozen record used 4; GMM refits are bit-exact only at 4
@@ -45,6 +49,7 @@ import json  # noqa: E402
 import platform  # noqa: E402
 import subprocess  # noqa: E402
 import time  # noqa: E402
+import traceback  # noqa: E402
 
 import numpy as np  # noqa: E402
 
@@ -57,7 +62,7 @@ from dataset import DEFAULT_NPZ, TEST_RUN, load_test  # noqa: E402
 from estimators import (LMMSE, add_noise, channel_stats, linear_matrix,  # noqa: E402
                         pilot_positions, spline_matrix, withheld)
 from neural import VARIANTS, load_predictor  # noqa: E402
-from runlog import _git, code_state, load_artifacts, save_run  # noqa: E402
+from runlog import _git, load_artifacts, save_run, sha256  # noqa: E402
 import gmm_feasibility as g03  # noqa: E402  (cov, mix_estimate)
 import run_mismatch as g04  # noqa: E402     (summarize: experiment 04's summary of the SNR grid)
 import run_gmm_seeds as g06  # noqa: E402    (kmeans_labels, fit_em, digest: the EM of experiment 06)
@@ -77,16 +82,18 @@ DEFINITIONS = {
                "evaluated vectors; 3 decimals (as the validation records, so the rehearsal can compare)",
     "ci95": "paired block bootstrap over the evaluated 50-snapshot blocks, B=2000, numpy default_rng(0); the "
             "2.5 / 97.5 percentiles; 4 decimals",
-    "ci95_200snap": "the same with 4 neighbouring blocks merged (200 snapshots, default_rng(1)): a robustness "
-                    "check of the CI against correlation between neighbouring blocks",
+    "ci95_200snap": "the same with the evaluated blocks of each 200-snapshot window of the run merged (block "
+                    "index // 4; all 4 blocks on the test run, the 2 odd ones in an odd-block rehearsal; "
+                    "default_rng(1)): a robustness check of the CI against correlation between neighbouring blocks",
     "ci_excludes_zero": "from the UNROUNDED percentiles: +1 if the CI lies above 0, -1 below 0, 0 otherwise",
     "<k>_gain_over_lmmse_db": "NMSE(LMMSE) - NMSE(k) from unrounded NMSEs, 4 decimals; positive = k better",
     "gmm@mean_gain_over_<v>@mean_db": "NMSE(<v>@mean) - NMSE(gmm@mean); positive = the GMM better",
     "<k>@seed<s>": "one model (seed s)",
     "<k>@mean": "seed average: per-block squared errors averaged over the seeds, then NMSE (an average "
                 "model, NOT averaged predictions)",
-    "mismatch": "experiment 04's summarize() on the true x assumed grid: its gains use unrounded NMSEs, its CIs "
-                "are rounded to 3 decimals; B=2000 here (04 used 1000)",
+    "mismatch": "experiment 04's summarize() on the true x assumed grid: gains from unrounded NMSEs (3 decimals), "
+                "gain CIs to 4 decimals with gain_ci_excludes_zero from the unrounded percentiles; B=2000 here "
+                "(04 used 1000)",
 }
 
 
@@ -120,10 +127,10 @@ class Blocks:
     """Evaluated 50-snapshot blocks of one part: block index per vector, bootstrap resamples, merged blocks."""
 
     def __init__(self, block_ids):
-        _, self.gid = np.unique(block_ids, return_inverse=True)
+        ids, self.gid = np.unique(block_ids, return_inverse=True)
         self.nb = int(self.gid.max()) + 1
         self.boots = np.random.default_rng(0).integers(0, self.nb, (B_TEST, self.nb))
-        self.group = np.arange(self.nb) // MERGE
+        _, self.group = np.unique(ids // MERGE, return_inverse=True)   # same 200-snapshot window of the run
         self.nb4 = int(self.group.max()) + 1
         self.boots4 = np.random.default_rng(1).integers(0, self.nb4, (B_TEST, self.nb4))
 
@@ -310,7 +317,7 @@ def evaluate_mismatch(fz, base, seeds, d, mask, log):
                             put(net, (k, i, j), pred(Y, s_vec))
         for net in nets.values():
             del net["preds"]
-        out[str(n_obs)] = g04.summarize(raw, snrs, blk.boots)
+        out[str(n_obs)] = g04.summarize(raw, snrs, blk.boots, ci_digits=4)
         wc = out[str(n_obs)]["worst_case_loss_db"]
         msg = (f"  mismatch {n_obs:2d} pilots ({time.time() - t0:.0f} s): worst loss vs own matched SNR: "
                + "  ".join(f"{v} {wc[v]['vs_own_matched']['loss_db']:.2f}" for v in ["lmmse"] + list(nets)
@@ -486,41 +493,75 @@ def check_rehearsal_joint(out, fz, rec06, mlp, log):
     return max_abs_diff(pairs, "joint", log)
 
 
-# ----------------------------------------------------------------------------- test-run guards
+# ----------------------------------------------------------------------------- provenance and guards
+CODE_SPEC = [":(glob)src/**/*.py", ":(glob)experiments/**/*.py", ":(glob)tools/**/*.py"]   # code that can change a number
+
+
+def code_dirty():
+    """Uncommitted or untracked Python code under src/, experiments/ or tools/ (None if git is unavailable)."""
+    out = _git("status", "--porcelain", "--untracked-files=all", "--", *CODE_SPEC)
+    return None if out is None else bool(out)
+
+
+def record_paths(fz):
+    return [f"{r}/run.json" for r in frozen_records(fz)]
+
+
+def computational(fz):
+    """The parts of frozen.json that decide a number (status, claims and notes do not)."""
+    return {k: fz[k] for k in ("main", "mismatch", "joint")}
+
+
+def tracked_clean(rel):
+    return _git("ls-files", rel) == rel and not _git("status", "--porcelain", "--", rel)
+
+
+def same_inputs(old_start, old_frozen, fz, data_sha):
+    """None if a run that started at old_start used the code, frozen records, frozen choices and data of now;
+    otherwise the reason why not."""
+    if old_start.get("data", {}).get("sha256") != data_sha:
+        return "data file differs"
+    if computational(old_frozen) != computational(fz):
+        return "frozen choices differ"
+    if not git_ok("diff", "--quiet", old_start["git_commit"], _git("rev-parse", "HEAD"), "--",
+                  *CODE_SPEC, *record_paths(fz)):
+        return f"code or frozen records changed since {old_start['git_commit'][:7]}"
+    return None
+
+
 def earlier_attempts():
     return sorted(glob.glob(os.path.join(ROOT, "results", f"*{TEST_TAG}*"))
                   + glob.glob(os.path.join(ROOT, "data", "logs", f"*{TEST_TAG}*")))
 
 
-def find_rehearsal(fz, env):
-    """A passing three-part odd-block rehearsal whose code equals the current code (frozen.json's status
-    aside) and whose environment equals the current one; returns its folder or None, with the reasons."""
-    head = _git("rev-parse", "HEAD")
+def find_rehearsal(fz, env, data_sha):
+    """A committed, passing three-part odd-block rehearsal that ran on clean code which did not change during
+    the run, and whose code, frozen records, frozen choices, data file and environment equal the current ones."""
     reasons = []
     for path in sorted(glob.glob(os.path.join(ROOT, "results", "*_rehearsal-0056-odd", "run.json"))):
-        r = json.load(open(path, encoding="utf-8"))
-        c, m, tag = r["config"], r["metrics"], os.path.basename(os.path.dirname(path))
-        if r.get("git_uncommitted_changes") is not False or list(c.get("parts", [])) != list(PARTS):
-            reasons.append(f"{tag}: not a clean three-part rehearsal")
-            continue
-        if not all(k in m and m[k] <= TOL_DB for k in ("rehearsal_main_max_abs_diff_db",
-                                                      "rehearsal_mismatch_max_abs_diff_db",
-                                                      "rehearsal_joint_max_abs_diff_db")):
-            reasons.append(f"{tag}: a reproduction check is missing or failed")
-            continue
-        if not git_ok("diff", "--quiet", r["git_commit"], head, "--", "src", "experiments", "tools",
-                      f":(exclude){FROZEN_REL}"):
-            reasons.append(f"{tag}: code at {r['git_commit']} differs from HEAD")
-            continue
-        fr = dict(c["frozen"]); fr.pop("status", None)
-        fc = dict(fz); fc.pop("status", None)
-        if fr != fc:
-            reasons.append(f"{tag}: frozen choices differ")
-            continue
-        if c.get("env") != env:
-            reasons.append(f"{tag}: environment {c.get('env')} differs from {env}")
-            continue
-        return os.path.dirname(path), reasons
+        rel = os.path.relpath(path, ROOT).replace(os.sep, "/")
+        with open(path, encoding="utf-8") as f:
+            r = json.load(f)
+        c, m, tag = r["config"], r["metrics"], rel.split("/")[1]
+        st, en = c.get("start", {}), c.get("end", {})
+        if list(c.get("parts", [])) != list(PARTS) or not c.get("odd_only"):
+            why = "not a three-part odd-block rehearsal"
+        elif not (st.get("code_dirty") is False and en.get("code_dirty") is False
+                  and c.get("code_changed_during_run") is False and st.get("records_clean") is True):
+            why = "code or frozen records were not clean, or changed during the run"
+        elif not all(k in m and m[k] <= TOL_DB for k in ("rehearsal_main_max_abs_diff_db",
+                                                       "rehearsal_mismatch_max_abs_diff_db",
+                                                       "rehearsal_joint_max_abs_diff_db")):
+            why = "a reproduction check is missing or failed"
+        elif not tracked_clean(rel):
+            why = "the rehearsal record is not committed (or is modified)"
+        elif c.get("env") != env:
+            why = f"environment {c.get('env')} differs from {env}"
+        else:
+            why = same_inputs(st, c["frozen"], fz, data_sha)
+        if why is None:
+            return rel.rsplit("/", 1)[0], reasons
+        reasons.append(f"{tag}: {why}")
     return None, reasons
 
 
@@ -535,7 +576,7 @@ def main():
                     help="rehearsal only: evaluate a subset (the test always evaluates every part)")
     ap.add_argument("--confirm-test", action="store_true")
     ap.add_argument("--after-failed-attempt", metavar="REASON",
-                    help="test only: an earlier attempt exists (see results/ and data/logs/); say why it failed")
+                    help="test only: an earlier attempt crashed (see results/ and data/logs/); say what happened")
     a = ap.parse_args()
     t0 = time.time()
     stamp = time.strftime("%Y%m%d-%H%M")
@@ -544,14 +585,30 @@ def main():
     name = TEST_TAG if test else ("rehearsal-0056" + ("-odd" if a.odd_only else "-full")
                                   + ("" if parts == list(PARTS) else "-" + "-".join(parts)))
     logdir = os.path.join(ROOT, "data", "logs")
-    logfile = None                                     # opened only after the guards: its name marks an attempt
+    state = {"logfile": None, "buffer": []}            # the log file is opened only once an attempt has started
 
     def log(s):
         print(s, flush=True)
-        if logfile is not None:
-            logfile.write(s + "\n")
-            logfile.flush()
+        if state["logfile"] is None:
+            state["buffer"].append(s)
+        else:
+            state["logfile"].write(s + "\n")
+            state["logfile"].flush()
 
+    def open_log():
+        os.makedirs(logdir, exist_ok=True)
+        state["logfile"] = open(os.path.join(logdir, f"{stamp}_{name}.log"), "a", encoding="utf-8")
+        for s in state["buffer"]:
+            state["logfile"].write(s + "\n")
+        state["logfile"].flush()
+
+    # ---- checks that read no data
+    if test and (not a.confirm_test or a.odd_only or parts != list(PARTS)):
+        sys.exit("the test run needs --confirm-test, no --odd-only and every part")
+    if not test and a.run != 56:
+        sys.exit("only run 56 (rehearsal) or 57 (test) are meaningful here")
+    if not test and (a.confirm_test or a.after_failed_attempt):
+        sys.exit("--confirm-test / --after-failed-attempt belong to the test run only")
     env = environment()
     if env["openblas_threads"] != [4]:
         sys.exit(f"OpenBLAS runs with {env['openblas_threads']} threads, not 4; the frozen GMMs need 4")
@@ -559,25 +616,29 @@ def main():
     if rec06.get("numpy") != env["numpy"] or str(rec06.get("blas_threads")) != "4":   # GMM refits are bit-exact
         sys.exit(f"experiment 06 ran with numpy {rec06.get('numpy')} / {rec06.get('blas_threads')} BLAS threads; "
                  f"now numpy {env['numpy']} / 4: the GMM refits would not reproduce its models")
+    if not os.path.exists(a.data):
+        sys.exit(f"data file {a.data} not found")
+    data_sha = sha256(a.data)
     config = {"run": a.run, "odd_only": a.odd_only, "parts": parts, "frozen": fz, "bootstrap_B": B_TEST,
-              "merged_blocks_for_ci95_200snap": MERGE, "env": env,
+              "merge_for_ci95_200snap": MERGE, "env": env,
               "start": {"git_commit": _git("rev-parse", "HEAD"), "time": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                        "frozen_json_blob": _git("rev-parse", f"HEAD:{FROZEN_REL}")}}
-
+                        "code_dirty": code_dirty(),
+                        "records_clean": all(tracked_clean(r) for r in record_paths(fz)),
+                        "frozen_json_committed_blob": _git("rev-parse", f"HEAD:{FROZEN_REL}"),
+                        "frozen_json_clean": tracked_clean(FROZEN_REL),
+                        "data": {"path": a.data, "bytes": os.path.getsize(a.data), "sha256": data_sha}}}
     if test:
-        if not a.confirm_test or a.odd_only or parts != list(PARTS):
-            sys.exit("the test run needs --confirm-test, no --odd-only and every part")
-        uncommitted, new_code = code_state()
-        if uncommitted is not False:
-            sys.exit(f"refusing: commit the frozen code and frozen.json first (untracked code: {new_code})")
-        for rel in [FROZEN_REL] + [f"{r}/run.json" for r in frozen_records(fz)]:
-            if _git("ls-files", rel) != rel or _git("status", "--porcelain", "--", rel):
-                sys.exit(f"refusing: {rel} must be committed and unmodified")
+        st = config["start"]
+        if st["code_dirty"] is not False or not st["records_clean"] or not st["frozen_json_clean"]:
+            sys.exit("refusing: commit the code, frozen.json and every record it names first")
         if fz.get("status") != "FROZEN":
             sys.exit("refusing: frozen.json status is not FROZEN")
-        rehearsal, why = find_rehearsal(fz, env)
+        done = glob.glob(os.path.join(ROOT, "results", f"*_{TEST_TAG}", "run.json"))
+        if done:
+            sys.exit(f"refusing: the test run was already evaluated: {done}")
+        rehearsal, why = find_rehearsal(fz, env, data_sha)
         if rehearsal is None:
-            sys.exit("refusing: no passing three-part odd-block rehearsal of this code in this environment:\n  "
+            sys.exit("refusing: no usable rehearsal of this code, these frozen choices, this data and environment:\n  "
                      + "\n  ".join(why or ["no results/*_rehearsal-0056-odd record"]))
         earlier = earlier_attempts()
         if earlier and not a.after_failed_attempt:
@@ -585,99 +646,118 @@ def main():
                      f"--after-failed-attempt \"<what happened>\"; that is written into the record")
         if a.after_failed_attempt and not earlier:
             sys.exit("--after-failed-attempt given, but no earlier attempt exists")
-        config.update(rehearsal=os.path.relpath(rehearsal, ROOT).replace(os.sep, "/"),
-                      previous_attempts=[os.path.relpath(x, ROOT).replace(os.sep, "/") for x in earlier],
-                      after_failed_attempt=a.after_failed_attempt)
-    elif a.run != 56:
-        sys.exit("only run 56 (rehearsal) or 57 (test) are meaningful here")
-    elif a.confirm_test or a.after_failed_attempt:
-        sys.exit("--confirm-test / --after-failed-attempt belong to the test run only")
-    os.makedirs(logdir, exist_ok=True)
-    logfile = open(os.path.join(logdir, f"{stamp}_{name}.log"), "a", encoding="utf-8")
+        for sj in glob.glob(os.path.join(ROOT, "results", f"*_{TEST_TAG}-started", "started.json")):
+            with open(sj, encoding="utf-8") as f:
+                old = json.load(f)
+            why_old = same_inputs(old["start"], old["frozen"], fz, data_sha)
+            if why_old:
+                sys.exit(f"refusing: {sj}: {why_old}; nothing may change after an attempt that may have seen "
+                         f"test numbers")
+        config.update(rehearsal=rehearsal, after_failed_attempt=a.after_failed_attempt,
+                      previous_attempts=[os.path.relpath(x, ROOT).replace(os.sep, "/") for x in earlier])
+    else:
+        open_log()
     log(f"{name}: {' '.join(sys.argv)}; env {env}")
 
-    # ---- pre-flight on the training runs only (nothing of the evaluated run is extracted yet)
-    prep = F = None
-    if "joint" in parts:
-        t = time.time()
-        F = load_spacefreq(a.data)
-        log(f"[pre-flight] joint fit vectors {F['Xf'].shape}; checking records, MLPs and the GMM refits")
-        prep = prepare_joint(fz, rec06, mlp, F, log)
-        config["joint_preflight"] = {"fits": prep["fits"], "runtime_s": round(time.time() - t, 1)}
-    if test:                                            # every check passed: the attempt starts now
-        marker = os.path.join(ROOT, "results", f"{stamp}_{a.member}_{TEST_TAG}-started")
-        os.makedirs(marker, exist_ok=False)
-        with open(os.path.join(marker, "started.json"), "w", encoding="utf-8") as f:
-            json.dump({"note": "an attempt at THE test on run 0057 started here; commit this folder", **config,
-                       "command": " ".join(sys.argv)}, f, indent=1)
-        log(f"[test] attempt marker {marker}")
-
-    metrics = {"definitions": DEFINITIONS}
-    partial = os.path.join(logdir, f"{stamp}_{name}_partial.json")
-
-    def keep():   # a crash in a later part must not lose the numbers already computed (data/ is not in git)
-        with open(partial + ".tmp", "w", encoding="utf-8") as f:
-            json.dump({"config": config, "metrics": metrics}, f, indent=1)
-        os.replace(partial + ".tmp", partial)
-
-    check = a.odd_only and not test
-    if not test and not a.odd_only:
-        log("[full-size dry run] all blocks of run 56: the validation records cover only the odd blocks, "
-            "so no reproduction check is possible here")
-    if "joint" in parts:
-        t = time.time()
-        E = load_spacefreq(a.data, a.run, F["scale"], confirm=test)
-        mask = (E["block"] % 2 == 1) if a.odd_only else np.ones(len(E["Xe"]), bool)
-        log(f"[joint] run {a.run:04d}: evaluating {int(mask.sum())} snapshots; {E['screened_fraction']:.2%} of the "
-            f"run's {E['n_run_snapshots']} snapshots screened out (not all 32 antennas ok)")
-        metrics["joint"], nb = evaluate_joint(fz, prep, E, mask, log)
-        config["joint_data"] = {"n_fit": int(len(F["Xf"])), "n_vectors": int(mask.sum()), "n_blocks": nb,
-                                "dim": int(E["Xe"].shape[1]), "n_run_snapshots": E["n_run_snapshots"],
-                                "screened_fraction": E["screened_fraction"], "runtime_s": round(time.time() - t, 1)}
-        keep()
-        del E, F, prep, mask
-        gc.collect()
-        if check:
-            metrics["rehearsal_joint_max_abs_diff_db"] = check_rehearsal_joint(metrics["joint"], fz, rec06, mlp, log)
-    if "main" in parts or "mismatch" in parts:
-        d = load_test(a.data, test_run=a.run, confirm=test)
-        mask = d.odd if a.odd_only else np.ones(len(d.Ht), bool)
-        log(f"[main] run {a.run:04d}: fit {len(d.Hf)}, evaluating {int(mask.sum())} vectors; "
-            f"screened fraction {d.screened_fraction}")
-        config["main_data"] = {"n_fit": int(len(d.Hf)), "n_vectors": int(mask.sum()),
-                               "screened_fraction": d.screened_fraction}
-        if len(d.Hf) != base["metrics"]["summary"]["fit_vectors"]:
-            raise RuntimeError("main-line fit set differs from the baselines record")
-        if "main" in parts:
+    marker, metrics = None, {"definitions": DEFINITIONS}
+    try:
+        # ---- pre-flight on the training runs only (nothing of the evaluated run is extracted yet)
+        F = prep = None
+        if "joint" in parts:
             t = time.time()
-            metrics["main"], config["main_data"]["n_blocks"] = evaluate_main(fz, base, seeds, d, mask, log)
-            config["main_data"]["runtime_s"] = round(time.time() - t, 1)
-            keep()
-            if check:
-                metrics["rehearsal_main_max_abs_diff_db"] = check_rehearsal_main(metrics["main"], fz, base, seeds, log)
-        if "mismatch" in parts:
-            t = time.time()
-            log("[mismatch] true x assumed SNR grid with the frozen designs")
-            metrics["mismatch"] = evaluate_mismatch(fz, base, seeds, d, mask, log)
-            config["mismatch_runtime_s"] = round(time.time() - t, 1)
-            keep()
-            if check:
-                metrics["rehearsal_mismatch_max_abs_diff_db"] = check_rehearsal_mismatch(metrics["mismatch"], fz, log)
-        del d, mask
-        gc.collect()
+            F = load_spacefreq(a.data)
+            log(f"[pre-flight] joint fit vectors {F['Xf'].shape}; checking records, MLPs and the GMM refits")
+            prep = prepare_joint(fz, rec06, mlp, F, log)
+            config["joint_preflight"] = {"fits": prep["fits"], "runtime_s": round(time.time() - t, 1)}
+        if test:                                        # every check passed: the attempt starts now
+            marker = os.path.join(ROOT, "results", f"{stamp}_{a.member}_{TEST_TAG}-started")
+            os.makedirs(marker, exist_ok=False)
+            with open(os.path.join(marker, "started.json"), "w", encoding="utf-8") as f:
+                json.dump({"note": "an attempt at THE test on run 0057 started here; commit this folder",
+                           "command": " ".join(sys.argv), **config}, f, indent=1)
+            open_log()
+            log(f"[test] attempt marker {marker}")
 
-    config["runtime_s"] = round(time.time() - t0, 1)
-    end_commit, (end_dirty, _) = _git("rev-parse", "HEAD"), code_state()
-    config["end"] = {"git_commit": end_commit, "uncommitted_changes": end_dirty}
-    config["repo_changed_during_run"] = bool(end_commit != config["start"]["git_commit"] or end_dirty)
-    if config["repo_changed_during_run"]:
-        log("WARNING: the repository changed while this ran; config.start holds the state the run was checked at")
-    save_run(name, a.member, config, metrics,
-             note=("THE single evaluation on test run 0057 with frozen choices" if test
-                   else "rehearsal of the test code path on validation run 0056"))
-    os.remove(partial)                                                  # the full record is saved
-    log(f"done in {time.time() - t0:.0f} s")
-    logfile.close()
+        partial = os.path.join(logdir, f"{stamp}_{name}_partial.json")
+
+        def keep():   # a crash in a later part must not lose the numbers already computed (data/ is not in git)
+            with open(partial + ".tmp", "w", encoding="utf-8") as f:
+                json.dump({"config": config, "metrics": metrics}, f, indent=1)
+            os.replace(partial + ".tmp", partial)
+
+        check = a.odd_only and not test
+        if not test and not a.odd_only:
+            log("[full-size dry run] all blocks of run 56: the validation records cover only the odd blocks, "
+                "so no reproduction check is possible here")
+        if "joint" in parts:
+            t = time.time()
+            E = load_spacefreq(a.data, a.run, F["scale"], confirm=test)
+            mask = (E["block"] % 2 == 1) if a.odd_only else np.ones(len(E["Xe"]), bool)
+            log(f"[joint] run {a.run:04d}: evaluating {int(mask.sum())} snapshots; {E['screened_fraction']:.2%} of "
+                f"the run's {E['n_run_snapshots']} snapshots screened out (not all 32 antennas ok)")
+            metrics["joint"], nb = evaluate_joint(fz, prep, E, mask, log)
+            config["joint_data"] = {"n_fit": int(len(F["Xf"])), "n_vectors": int(mask.sum()), "n_blocks": nb,
+                                    "dim": int(E["Xe"].shape[1]), "n_run_snapshots": E["n_run_snapshots"],
+                                    "screened_fraction": E["screened_fraction"], "runtime_s": round(time.time() - t, 1)}
+            keep()
+            del E, F, prep, mask
+            gc.collect()
+            if check:
+                metrics["rehearsal_joint_max_abs_diff_db"] = check_rehearsal_joint(metrics["joint"], fz, rec06, mlp, log)
+        if "main" in parts or "mismatch" in parts:
+            d = load_test(a.data, test_run=a.run, confirm=test)
+            mask = d.odd if a.odd_only else np.ones(len(d.Ht), bool)
+            log(f"[main] run {a.run:04d}: fit {len(d.Hf)}, evaluating {int(mask.sum())} vectors; "
+                f"screened fraction {d.screened_fraction}")
+            config["main_data"] = {"n_fit": int(len(d.Hf)), "n_vectors": int(mask.sum()),
+                                   "screened_fraction": d.screened_fraction}
+            if len(d.Hf) != base["metrics"]["summary"]["fit_vectors"]:
+                raise RuntimeError("main-line fit set differs from the baselines record")
+            if "main" in parts:
+                t = time.time()
+                metrics["main"], config["main_data"]["n_blocks"] = evaluate_main(fz, base, seeds, d, mask, log)
+                config["main_data"]["runtime_s"] = round(time.time() - t, 1)
+                keep()
+                if check:
+                    metrics["rehearsal_main_max_abs_diff_db"] = check_rehearsal_main(metrics["main"], fz, base, seeds, log)
+            if "mismatch" in parts:
+                t = time.time()
+                log("[mismatch] true x assumed SNR grid with the frozen designs")
+                metrics["mismatch"] = evaluate_mismatch(fz, base, seeds, d, mask, log)
+                config["mismatch_runtime_s"] = round(time.time() - t, 1)
+                keep()
+                if check:
+                    metrics["rehearsal_mismatch_max_abs_diff_db"] = check_rehearsal_mismatch(metrics["mismatch"], fz, log)
+            del d, mask
+            gc.collect()
+
+        config["runtime_s"] = round(time.time() - t0, 1)
+        end_commit = _git("rev-parse", "HEAD")
+        config["end"] = {"git_commit": end_commit, "code_dirty": code_dirty(),
+                         "records_clean": all(tracked_clean(r) for r in record_paths(fz))}
+        config["code_changed_during_run"] = bool(
+            config["end"]["code_dirty"] is not False or not config["end"]["records_clean"]
+            or not git_ok("diff", "--quiet", config["start"]["git_commit"], end_commit, "--",
+                          *CODE_SPEC, *record_paths(fz)))
+        if config["code_changed_during_run"]:
+            log("WARNING: code or frozen records changed while this ran; config.start holds the state it ran with")
+        save_run(name, a.member, config, metrics,
+                 note=("THE single evaluation on test run 0057 with frozen choices" if test
+                       else "rehearsal of the test code path on validation run 0056"))
+        os.remove(partial)                                              # the full record is saved
+        log(f"done in {time.time() - t0:.0f} s")
+    except BaseException as exc:
+        if state["logfile"] is not None:
+            log("FAILED:\n" + traceback.format_exc())
+        if marker is not None:
+            with open(os.path.join(marker, "crashed.json"), "w", encoding="utf-8") as f:
+                json.dump({"time": time.strftime("%Y-%m-%dT%H:%M:%S"), "exception": repr(exc),
+                           "traceback": traceback.format_exc(),
+                           "parts_finished": [k for k in PARTS if k in metrics]}, f, indent=1)
+        raise
+    finally:
+        if state["logfile"] is not None:
+            state["logfile"].close()
 
 
 if __name__ == "__main__":

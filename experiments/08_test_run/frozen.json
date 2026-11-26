@@ -1,5 +1,5 @@
 {
- "status": "DRAFT - not frozen yet; freeze = commit this file with status FROZEN before the test run",
+ "status": "DRAFT - not frozen yet. Every field except status must be final before the rehearsal that unlocks the test; freeze = commit this file with status FROZEN",
  "main": {
   "baselines_run": "results/20261106-0713_auto_baselines-val",
   "mlp_runs": [
@@ -7,44 +7,100 @@
    "results/20261126-1204_auto-seed1_mlp-val",
    "results/20261126-1204_auto-seed2_mlp-val"
   ],
-  "variants": ["mlp", "mlp_relweight", "residual", "mlp_blind"],
-  "densities": [16, 8, 4],
-  "snrs": [0, 5, 10, 15, 20, 25, 30]
+  "variants": [
+   "mlp",
+   "mlp_relweight",
+   "residual",
+   "mlp_blind"
+  ],
+  "densities": [
+   16,
+   8,
+   4
+  ],
+  "snrs": [
+   0,
+   5,
+   10,
+   15,
+   20,
+   25,
+   30
+  ]
  },
  "mismatch": {
   "validation_run": "results/20261126-1625_auto_snr-mismatch-val",
   "designs": "LMMSE for assumed SNR a: main.baselines_run loading for a; SNR-aware MLPs get a; mlp_blind ignores it",
-  "variants": ["mlp", "mlp_relweight", "residual", "mlp_blind"],
-  "densities": [16, 8, 4],
-  "snrs": [0, 5, 10, 15, 20, 25, 30]
+  "variants": [
+   "mlp",
+   "mlp_relweight",
+   "residual",
+   "mlp_blind"
+  ],
+  "densities": [
+   16,
+   8,
+   4
+  ],
+  "snrs": [
+   0,
+   5,
+   10,
+   15,
+   20,
+   25,
+   30
+  ]
  },
  "joint": {
   "setting": "spacefreq (experiment 03): 32 antennas x 16 subcarriers",
   "gmm_run": "results/20261126-1653_auto_gmm-seeds-spacefreq",
-  "gmm_seeds": [0, 1, 2],
+  "gmm_seeds": [
+   0,
+   1,
+   2
+  ],
   "gmm_config": "per seed and row, the (K, alpha) that seed chose on validation; refit must reproduce model_sha256",
   "mlp_runs": {
    "32ant x 4sc": "results/20261126-1816_auto-p32_joint-mlp-val",
    "8ant x 4sc": "results/20261126-1813_auto-p8_joint-mlp-val"
   },
-  "mlp_variants": ["jmlp", "jresidual"],
-  "mlp_seeds": [0, 1, 2],
-  "patterns": ["32ant x 4sc", "8ant x 4sc"],
-  "snrs": [0, 10, 20, 30]
+  "mlp_variants": [
+   "jmlp",
+   "jresidual"
+  ],
+  "mlp_seeds": [
+   0,
+   1,
+   2
+  ],
+  "patterns": [
+   "32ant x 4sc",
+   "8ant x 4sc"
+  ],
+  "snrs": [
+   0,
+   10,
+   20,
+   30
+  ]
  },
  "claims": {
-  "primary": {
-   "M1": "64-subcarrier line: for each MLP variant (seed average) in each of 3 densities x 7 SNRs, the paired gain over LMMSE. 'No learned estimator beats LMMSE' holds if no cell has ci_excludes_zero = +1 together with a gain of at least equivalence_margin_db",
-   "J1": "joint setting: the GMM's (seed average) gain over joint LMMSE has ci_excludes_zero = +1 in every one of the 8 rows (2 patterns x 4 SNRs)",
-   "J2": "joint setting: the GMM's gain over each joint MLP (seed averages) has ci_excludes_zero = +1, reported per row; 'in every row' is claimed only if all 16 hold"
-  },
+  "rule": "one rule for every gain g (seed averages; positive = better): 'better' iff ci_excludes_zero = +1 and g >= margin; 'significant but negligible' iff ci_excludes_zero = +1 and g < margin (or -1 and g > -margin); 'worse' iff ci_excludes_zero = -1 and g <= -margin; 'equivalent' iff the whole CI lies inside [-margin, +margin]; otherwise 'inconclusive'",
   "equivalence_margin_db": 0.1,
-  "margin_rule": "a gain whose CI lies inside [-0.1, +0.1] dB is called equal to LMMSE; a CI that excludes 0 by less than 0.1 dB is reported but called practically negligible",
+  "primary": {
+   "M1": "64-subcarrier line: 'no learned estimator beats LMMSE' holds iff no (variant, density, SNR) cell of the 4 MLP variants x 3 densities x 7 SNRs is 'better' than LMMSE",
+   "J1": "joint setting: 'the GMM beats joint LMMSE' holds in a row iff the GMM's gain over LMMSE is 'better'; claimed for all rows only if all 8 rows (2 patterns x 4 SNRs) hold",
+   "J2": "joint setting: 'the GMM beats joint MLP v' holds in a row iff gmm@mean_gain_over_<v>@mean_db is 'better'; reported per row and claimed for all rows only if all 8 rows hold, for each v"
+  },
   "ci_family": "seed averages (@mean) carry the claims; per-seed results are descriptive",
   "multiplicity": "counts of CIs that exclude zero are descriptive and not adjusted for multiplicity",
-  "block_robustness": "if ci95_200snap and ci95 disagree on a primary claim, the report gives both",
-  "descriptive_only": ["interpolation versus LMMSE", "SNR-mismatch losses (offsets, worst case, fixed design)",
-                       "joint MLPs versus joint LMMSE"]
+  "block_robustness": "if ci95_200snap and ci95 lead to different categories for a primary claim, the report gives both",
+  "descriptive_only": [
+   "interpolation versus LMMSE",
+   "SNR-mismatch losses (offsets, worst case, fixed design)",
+   "joint MLPs versus joint LMMSE"
+  ]
  },
  "validation_only": {
   "space32 GMM (experiment 06)": "32-antenna denoising; not part of the report's comparison",

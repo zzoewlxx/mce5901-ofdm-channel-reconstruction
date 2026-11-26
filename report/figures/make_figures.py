@@ -3,7 +3,7 @@
     python report/figures/make_figures.py --main <run folder of experiment 08> --mismatch <run folder of 04>
 
 The suffix of each figure name says which run the numbers come from: "_test" for test run 0057 (the record
-of THE test), "_val" for validation run 0056 (a rehearsal record, or experiment 04). main.tex includes the
+of THE test), "_val" for validation run 0056 (a rehearsal record; "_val04" for experiment 04's record). main.tex includes the
 "_test" files, so a figure drawn from validation numbers can never end up in the report by accident.
 """
 import argparse
@@ -148,8 +148,8 @@ def main():
             fig_mismatch(rec, os.path.join(a.out, f"fig_mismatch_{t}.{a.fmt}"))
             done.append(f"fig_mismatch_{t}.{a.fmt}")
     if a.mismatch:                                       # experiment 04's record: validation run 0056
-        fig_mismatch(record(a.mismatch), os.path.join(a.out, f"fig_mismatch_val.{a.fmt}"))
-        done.append(f"fig_mismatch_val.{a.fmt}")
+        fig_mismatch(record(a.mismatch), os.path.join(a.out, f"fig_mismatch_val04.{a.fmt}"))
+        done.append(f"fig_mismatch_val04.{a.fmt}")
     print("written to", a.out, ":", "; ".join(done))
 
 

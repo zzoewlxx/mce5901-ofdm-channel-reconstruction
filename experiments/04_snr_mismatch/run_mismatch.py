@@ -253,9 +253,12 @@ def worst(L, snrs, max_offset=None):
     return {"loss_db": round(float(L[i, j]), 3), "true_snr_db": int(snrs[i]), "assumed_snr_db": int(snrs[j])}
 
 
-def summarize(raw, snrs, boots):
-    """All reported numbers of one density, from the per-seed NMSE and per-block errors."""
+def summarize(raw, snrs, boots, ci_digits=3):
+    """All reported numbers of one density, from the per-seed NMSE and per-block errors. Gain CI bounds are
+    rounded to ci_digits decimals; gain_ci_excludes_zero (+1 above 0, -1 below 0, 0 otherwise) comes from the
+    unrounded percentiles."""
     S = len(snrs)
+    rd = lambda x: np.round(np.asarray(x, float), ci_digits).tolist()
     ref_b = raw["ref_b"]
     bref = ref_b[boots].sum(-1)
 
@@ -281,7 +284,8 @@ def summarize(raw, snrs, boots):
         lo, hi = np.percentile(diff, [2.5, 97.5], axis=-1)
         grid[v] = {"seeds": net["seeds"], "snr_input": net["aware"], "nmse_db": r3(ens_db),
                    "per_seed_nmse_db": {str(s): r3(x) for s, x in zip(net["seeds"], net["nmse"])},
-                   "gain_over_lmmse_db": r3(gain), "gain_ci95_low": r3(lo), "gain_ci95_high": r3(hi),
+                   "gain_over_lmmse_db": r3(gain), "gain_ci95_low": rd(lo), "gain_ci95_high": rd(hi),
+                   "gain_ci_excludes_zero": np.where(lo > 0, 1, np.where(hi < 0, -1, 0)).tolist(),
                    "gain_seed_min": r3(seed_gain.min(0)), "gain_seed_max": r3(seed_gain.max(0))}
 
     ii = np.arange(S)
@@ -295,6 +299,7 @@ def summarize(raw, snrs, boots):
         matched[v] = {"nmse_db": (np.diag(n) if g["snr_input"] else n).tolist(),
                       "gain_over_lmmse_db": G["gain_over_lmmse_db"][ii, ii].tolist(),
                       "gain_ci95": np.stack([G["gain_ci95_low"][ii, ii], G["gain_ci95_high"][ii, ii]], 1).tolist(),
+                      "gain_ci_excludes_zero": np.asarray(g["gain_ci_excludes_zero"])[ii, ii].tolist(),
                       "gain_seed_range": np.stack([G["gain_seed_min"][ii, ii], G["gain_seed_max"][ii, ii]], 1).tolist()}
 
     offsets = {"vs_own_matched": {}, "vs_matched_lmmse": {}}
