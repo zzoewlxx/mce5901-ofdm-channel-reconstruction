@@ -15,8 +15,11 @@
 | ✅ | 全量数据下载、抽取子载波块、筛掉坏快照 | `tools/`、`src/`，Release `data-v1` |
 | ✅ | 全量数据基线：线性、样条、LMMSE（验证集） | `experiments/01_baselines_fulldata/` |
 | ✅ | MLP 变体：3 个随机种子 × 16/8/4 个导频（验证集） | `experiments/02_mlp_fulldata/` |
-| ⬜ | 噪声功率失配、计算成本、可选误码率；最后在测试集上跑一次 | 见 `docs/next_steps.md` |
-| ⬜ | 扩展：天线和频率联合重建。GMM 可行性试跑已完成（2026-11-19），加入天线维度后 GMM 在 0 dB 时比 LMMSE 好 1.5–2.8 dB；正式实验待做 | `experiments/03_gmm_feasibility/`、`docs/next_steps.md` 第 3 节 |
+| ✅ | 噪声功率（SNR）失配：真实 × 假设 SNR 网格，3 种导频数（验证集，2026-11-26） | `experiments/04_snr_mismatch/` |
+| ✅ | 扩展：GMM 3 个种子、加宽网格（验证集，2026-11-26） | `experiments/06_gmm_seeds/` |
+| ✅ | 扩展：天线 × 子载波联合 MLP，3 个种子（验证集，2026-11-26） | `experiments/07_joint_mlp/` |
+| ⬜ | 计算成本：脚本已写好，需要在机器空闲时计时 | `experiments/05_complexity/` |
+| ⬜ | 测试集 run 0057 上的唯一一次评估：脚本和验证集演练已完成，待冻结方法清单 | `experiments/08_test_run/` |
 | ⬜ | 汇报 PPT（12 月 18 日）与最终报告 | `report/` |
 
 具体任务和负责人在 GitHub Issues 里登记，用 Projects 看板跟踪进度。
@@ -67,13 +70,43 @@
 
 **还不能下的结论：** 加权损失改善了高 SNR、同时牺牲了一点低 SNR；大网络在相同训练轮数下没有改善。这还不足以排除网络容量、优化或训练轮数的影响。
 
-**可选扩展（待验证的假设）：** 32 根天线 × 64 个子载波联合重建时，99% 能量对应的线性维数约 28，而主要的物理变量是发射机位置，非线性模型也许有空间。详见 `docs/next_steps.md`。
+**扩展的出发点（当时的假设，结果见下文"扩展结果"）：** 32 根天线 × 64 个子载波联合重建时，99% 能量对应的线性维数约 28，而主要的物理变量是发射机位置，非线性模型也许有空间。详见 `docs/next_steps.md`。
 
 **扩展的可行性试跑（2026-11-19，验证集）：** 用文献中在实测数据上赢过 LMMSE 的 GMM 估计器做了检验。
 - 在原题目（单天线、64 个子载波）上，GMM 与 LMMSE 只差 0.00–0.02 dB，和 MLP 的结论一致。
 - 在 32 天线去噪和天线 × 频率联合重建中，GMM 在 0 dB 时分别好 2.8 dB 和 1.5 dB，置信区间不含 0。
 
 详见 `experiments/03_gmm_feasibility/README.md`。
+
+## SNR 失配结果（验证集 run 0056）
+
+结果文件夹：`results/20261126-1625_auto_snr-mismatch-val/`。接收机假设的 SNR 和真实 SNR 各取 0–30 dB，LMMSE 和带 SNR 输入的 MLP 拿到同一个假设值。对角线（假设 = 真实）与上面实验 02 的 378 个数完全相同。
+
+- **SNR 估低比估高危险得多。** LMMSE 假设的 SNR 偏低 30 dB 时平均损失 16.7–19.9 dB，偏高 30 dB 时只损失约 3 dB。偏差为 ±5 dB 时，所有方法的平均损失不超过 0.5 dB。
+- **带 SNR 输入的 MLP 比 LMMSE 稍稳**（最坏损失少 1–4 dB），但同样依赖 SNR 输入。残差 MLP 和 LMMSE 一样（差别 < 0.005 dB）。
+- **不输入 SNR 的盲 MLP 最稳**：与知道真实 SNR 的 LMMSE 相比，25 dB 及以下只差 0.02–0.63 dB，30 dB 时差 1.1–1.6 dB。与假设了错误 SNR 的 LMMSE 相比，126 个失配格点里有 113 个显著更好。
+
+详见 `experiments/04_snr_mismatch/README.md`。
+
+## 扩展结果：天线 × 子载波联合重建（验证集 run 0056）
+
+512 维（32 根天线 × 16 个子载波）。两种导频图样：32 天线 × 4 子载波（128 个导频）和 8 天线 × 4 子载波（32 个导频）。表中是相对联合 LMMSE 的增益（dB），GMM 是 3 个 k-means 种子的均值，MLP 是 3 个种子的集成：
+
+| 图样 | 方法 | 0 dB | 10 dB | 20 dB | 30 dB |
+|---|---|---|---|---|---|
+| 32 天线 × 4 子载波 | GMM（K=64 或 32） | +2.10 | +0.80 | +0.38 | +0.18 |
+| 32 天线 × 4 子载波 | 联合 MLP | +0.36 | −0.18 | −3.56 | −11.06 |
+| 32 天线 × 4 子载波 | 联合 LMMSE + 残差 MLP | +0.91 | +0.17 | −0.01 | −0.01 |
+| 8 天线 × 4 子载波 | GMM（K=64） | +2.98 | +4.66 | +5.47 | +5.86 |
+| 8 天线 × 4 子载波 | 联合 MLP | +2.25 | +4.37 | +4.66 | +4.59 |
+| 8 天线 × 4 子载波 | 联合 LMMSE + 残差 MLP | +2.29 | +4.50 | +4.85 | +4.73 |
+
+- 和单天线的主线相反，加入天线维度后**非线性方法明显优于 LMMSE**，导频越稀疏增益越大。GMM 在所有格点上的点估计都最高，它的每个种子的置信区间都不含 0。GMM 和 MLP 之差还没有配对置信区间，要在测试集评估时给出。
+- 直接回归的联合 MLP 在导频充足、高 SNR 时有误差底（约 −21 到 −23 dB），加上 LMMSE 残差结构后这个问题消失。
+- GMM 选中的 K 在网格边上，增益应看作下界。512 维时 EM 不会移动 k-means 的划分，GMM 实际上是"k-means 划分 + 每类一个收缩协方差"。
+- 只有空间维（32 天线去噪，`results/20261126-1811_auto_gmm-seeds-space32/`）时，GMM 也好 +0.05 到 +6.5 dB。
+
+详见 `experiments/06_gmm_seeds/README.md`、`experiments/07_joint_mlp/README.md`。
 
 ## 试跑得到的关键结论
 
@@ -91,13 +124,19 @@
 ## 目录结构
 
 ```
-src/                  可复用代码：dichasus_reader.py（读取器）、estimators.py（导频布局、插值、LMMSE、NMSE）、runlog.py（保存结果）
+src/                  可复用代码：dichasus_reader.py（读取器）、dataset.py（数据划分、测试集保护、bootstrap）、estimators.py（导频布局、插值、LMMSE、NMSE）、
+                      mlp_numpy.py（NumPy MLP，可保存权重）、neural.py（MLP 变体和读取权重）、runlog.py（保存结果和权重）、style.py（统一配色和图尺寸）
 tools/                download_dichasus.py（下载）、extract_block.py（抽取子载波块）、run_pipeline.py（一键全流程）
 experiments/          每个阶段一个文件夹，脚本可以独立运行
   00_pilot_2026-11-06/  可行性试跑及复核
   01_baselines_fulldata/ 全量数据基线（验证集）
   02_mlp_fulldata/       全量数据 MLP 变体（验证集）
   03_gmm_feasibility/    GMM 可行性试跑：单天线 / 多天线 / 天线 × 频率三种设置（验证集）
+  04_snr_mismatch/       SNR 失配（验证集）
+  05_complexity/         计算成本：乘加次数和实测耗时
+  06_gmm_seeds/          GMM：3 个种子、加宽网格（验证集）
+  07_joint_mlp/          天线 × 子载波联合 MLP（验证集）
+  08_test_run/           测试集 run 0057 上的唯一一次评估（frozen.json + 演练）
 results/              每次正式运行的结果（小文件），规则见 results/README.md
 docs/proposal/        提案（v1 是组员原稿，v2 是提交版）
 report/               最终报告（IEEE 会议模板，main.tex + reference.bib）
