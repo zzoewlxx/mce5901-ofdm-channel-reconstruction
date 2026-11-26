@@ -1,5 +1,5 @@
 {
- "status": "DRAFT - not frozen yet. Every field except status must be final before the rehearsal that unlocks the test; freeze = commit this file with status FROZEN",
+ "status": "FROZEN",
  "main": {
   "baselines_run": "results/20261106-0713_auto_baselines-val",
   "mlp_runs": [
