@@ -1,69 +1,401 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
-% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+% Packages: only those installed in the local MiKTeX and actually used (checked with kpsewhich).
+% Removed from the course template because they are missing locally and unused here:
+% algorithmic, algorithm2e, subfigure, natbib, multirow, threeparttable, diagbox.
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
-\usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
-
-\usepackage[ruled,linesnumbered]{algorithm2e}  
-\usepackage{amsmath} 
-\usepackage{subfigure}
-\usepackage[numbers,sort&compress]{natbib}
-\usepackage{multirow}
-\usepackage{threeparttable}
-\usepackage{diagbox}
 \usepackage{bm}
-\newtheorem{lemma}{Lemma}[section]
-%\newtheorem{proof}{Proof}[section]
-%\usepackage{amsthm}
-\newenvironment{proof}{{\it Proof}\quad}{\hfill $\square$\par}
+\usepackage{booktabs}
+\usepackage{url}
 
+% ---------------------------------------------------------------- notation
+\newcommand{\vh}{\bm{h}}
+\newcommand{\hh}{\hat{\bm{h}}}
+\newcommand{\vy}{\bm{y}}
+\newcommand{\vn}{\bm{n}}
+\newcommand{\vmu}{\bm{\mu}}
+\newcommand{\mC}{\bm{C}}
+\newcommand{\mI}{\bm{I}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cM}{\mathcal{M}}
+\newcommand{\CN}{\mathcal{CN}}
+% Draft markers: every [TBD] must be gone before submission (grep for "TBD").
+\newcommand{\tbd}[1]{\textbf{[TBD: #1]}}
+% Figure slot: includes figures/<file> once it exists, otherwise draws a framed placeholder of
+% the planned size, so the page count of the draft stays realistic.
+\newcommand{\figslot}[4]{% #1 file, #2 width, #3 height, #4 placeholder text
+  \IfFileExists{figures/#1}{\includegraphics[width=#2]{figures/#1}}{%
+    \fbox{\parbox[c][#3][c]{\dimexpr#2-2\fboxsep-2\fboxrule\relax}{\centering\footnotesize
+      \textbf{[TBD: \texttt{\detokenize{figures/#1}}]}\\[2pt] #4}}}}
 
-
-\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
-    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Your project title}
+\title{OFDM Channel Reconstruction from Sparse Noisy Pilots Using Measured CSI}
 
-
-
-\author{\IEEEauthorblockN{Student 1,
-Student 2
-}
-
-\IEEEauthorblockA{School of Science and Engineering, The Chinese University of Hong Kong, Shenzhen}
-\small{E-mails: }
-}
+% Names: pinyin of the names in docs/proposal/build/build_proposal.py (MEMBERS) -- to be confirmed.
+\author{\IEEEauthorblockN{Zhengyang Feng (225010324), Hao Xie (226010063), Hengyue San (226010043),
+Peiyu Zhong (225010390)}
+\IEEEauthorblockA{Group 12, School of Science and Engineering, The Chinese University of Hong Kong, Shenzhen\\
+\small{E-mails: [TBD]}}}
 
 \maketitle
 
 \begin{abstract}
-
-
+A pilot-based OFDM receiver must infer the channel on subcarriers without pilots, and its accuracy limits
+how far the pilot overhead can be reduced. Learned estimators are often reported to beat classical ones,
+mostly on simulated channels. We reconstruct measured channels of the public DICHASUS dichasus-005x
+dataset (32 receive antennas, indoor non-line-of-sight) from a few noisy pilots. On a 64-subcarrier block
+we compare linear and spline interpolation, LMMSE with training-data statistics, and multilayer
+perceptrons (MLPs) with and without knowledge of the noise level, for 0--30\,dB pilot SNR and 16, 8 or 4
+pilots; for joint antenna--frequency reconstruction we compare a Gaussian-mixture estimator and a joint
+MLP with joint LMMSE. Selection and reporting use separate blocks of a validation run with paired
+block-bootstrap confidence intervals, and a held-out run is evaluated once.
+\tbd{one or two sentences with the main findings on the test run}
 \end{abstract}
 
 \begin{IEEEkeywords}
-
+OFDM channel estimation, pilot interpolation, LMMSE, measured CSI, neural networks, Gaussian mixture model
 \end{IEEEkeywords}
-%
+
+%=====================================================================================================
 \section{Introduction}
+An OFDM receiver estimates the channel at a few pilot subcarriers and must infer it on all others. The
+accuracy is limited by the noise on the pilot estimates and by the pilot spacing, while every pilot
+occupies a resource element that could carry data. Classical receivers interpolate least-squares pilot
+estimates~\cite{coleri2002} or apply linear minimum mean-square-error (LMMSE) estimation with the
+frequency correlation of the channel~\cite{edfors1998}. Neural estimators such as
+ChannelNet~\cite{soltani2019} and ReEsNet~\cite{li2020} reported gains over these methods, but were mostly
+trained and evaluated on simulated channels, and how fair such comparisons are depends strongly on the
+baseline and the protocol~\cite{feriani2023}. Measured channels, such as those recorded by the DICHASUS
+channel sounder~\cite{euchner2021sounder,euchner2021data}, allow a more realistic test.
 
+We ask: \emph{under which conditions does a learned estimator help over LMMSE for reconstructing OFDM
+channels from noisy sparse pilots?} We vary the pilot SNR, the pilot density, whether the receiver knows
+the noise level, and the dimension of the reconstruction (frequency only, or antennas and frequency
+jointly). Our contributions are:
+\begin{itemize}
+\item a leakage-free protocol on measured CSI (one global scale, screening from the CSI itself, split by
+run, separate selection and reporting blocks, paired block bootstrap, one test evaluation);
+\item a comparison of interpolation, LMMSE and four MLP variants over 0--30\,dB and 16/8/4 of 64 pilots
+with three seeds, including noise-power mismatch and computational cost;
+\item an extension to joint reconstruction over antennas and subcarriers: joint LMMSE, a Gaussian-mixture
+(GMM) estimator~\cite{turan2022} and a joint MLP.
+\end{itemize}
+The code and every result record are public: \tbd{repository URL}.
 
-\section{Problem Description and modelling}
+%=====================================================================================================
+\section{Related Work}
+\emph{Classical estimation.} Coleri et al.~\cite{coleri2002} compared pilot arrangements and the
+interpolation of least-squares pilot estimates. Edfors et al.~\cite{edfors1998} derived the LMMSE
+estimator from the frequency correlation of the channel and a low-rank approximation of it by singular
+value decomposition. LMMSE is the best \emph{linear} estimator given the first two moments; it coincides
+with the MMSE estimator when the channel and the noise are jointly Gaussian, but not in general.
 
-\section{Algorithm}
+\emph{Learned estimators.} ChannelNet~\cite{soltani2019} treats the pilot grid as a low-resolution image
+and applies super-resolution and denoising networks; ReEsNet~\cite{li2020} uses a residual convolutional
+network. Both were evaluated mainly on simulated channel models. CeBed~\cite{feriani2023} benchmarks deep
+data-driven OFDM channel estimators, including ReEsNet; its public code computes the LMMSE reference from
+each sample's true channel, a genie rather than a practical receiver, whereas we fit all statistics on
+training data.
 
-\section{Experiment and results}
+\emph{Statistical learning on measured data.} Turan et al.~\cite{turan2022} fit a Gaussian mixture model
+to training channels and combine per-component LMMSE estimates; on measured multi-antenna channels it
+outperformed LMMSE with the sample covariance. Baur et al.~\cite{baur2024} trained a variational
+autoencoder-based estimator on real measurements, which outperformed LMMSE, a CNN estimator and other
+baselines. Both works estimate multi-antenna (spatial) channels; we ask whether such gains exist across
+OFDM subcarriers, and across antennas and subcarriers jointly.
 
+%=====================================================================================================
+\section{Problem Formulation}
+\label{sec:problem}
+\emph{Signal model.} Let $\vh\in\mathbb{C}^N$ be the channel of one receive antenna on a block of $N=64$
+consecutive subcarriers (in the joint setting of Section~\ref{sec:methods}, the stacked
+antenna--subcarrier array, $N=512$). Pilots occupy the index set $\cP$ with $|\cP|=n_p$; the remaining set
+$\cM$ is withheld. With unit-power pilots, the least-squares pilot estimates are
+\begin{equation}
+\vy=\vh_\cP+\vn,\qquad \vn\sim\CN(\bm{0},\sigma^2\mI_{n_p}).
+\label{eq:model}
+\end{equation}
+One constant $c$ scales all channels; it is computed on the training set $\mathcal{T}$ so that the
+average power per entry is one there, $\sum_{i\in\mathcal{T}}\|c\,\vh_i\|^2=N|\mathcal{T}|$. The pilot SNR
+is then $1/\sigma^2$, i.e., $\sigma^2=10^{-\mathrm{SNR}/10}$. Normalizing each snapshot by its
+own power is not allowed: it reveals $\|\vh\|$, which a receiver does not know, and in our pilot check it
+inflated the MLP.
+
+\emph{Metric.} For an evaluation set $\mathcal{E}$ we report
+\begin{equation}
+\mathrm{NMSE}=10\log_{10}\frac{\sum_{i\in\mathcal{E}}\|\hh_{\cM,i}-\vh_{\cM,i}\|^2}
+{\sum_{i\in\mathcal{E}}\|\vh_{\cM,i}\|^2}\ \text{dB},
+\label{eq:nmse}
+\end{equation}
+on the withheld entries only, since the pilot entries are observed directly.
+
+\emph{LMMSE.} With the sample mean $\vmu$ and covariance $\mC$ of the training channels,
+\begin{equation}
+\hh=\vmu+\mC_{:,\cP}\big(\mC_{\cP\cP}+(\sigma^2+\rho\,\bar p)\mI\big)^{-1}(\vy-\vmu_\cP),
+\label{eq:lmmse}
+\end{equation}
+where $\bar p=\mathrm{tr}(\mC_{\cP\cP})/n_p$ and $\rho\ge 0$ is a small diagonal loading. For centered
+training channels $\tilde\vh_i=\vh_i-\vmu$, averaging the squared error of a linear map $\bm{W}$ over the
+noise gives $\sum_i\|\tilde\vh_i-\bm{W}\tilde\vh_{\cP,i}\|^2+|\mathcal{T}|\sigma^2\|\bm{W}\|_F^2$. This is
+ridge regression from the clean pilots to the channel; its minimizer is the matrix in \eqref{eq:lmmse}
+with $\rho=0$, and the loading $\rho$ adds shrinkage. The expected error of \eqref{eq:lmmse} on $\cM$ is
+$\varepsilon(\sigma^2)=\mathrm{tr}\big(\mC_{\cM\cM}-\mC_{\cM\cP}(\mC_{\cP\cP}+\sigma^2\mI)^{-1}
+\mC_{\cP\cM}\big)$ (for $\rho=0$).
+
+\emph{GMM estimator.} Under the mixture prior $p(\vh)=\sum_{k=1}^K\pi_k\,\CN(\vh;\bm{0},\mC_k)$ and the
+model \eqref{eq:model}, the conditional mean is
+\begin{equation}
+\hh=\sum_{k=1}^K p(k\,|\,\vy)\,\mC_{k,:\cP}\big(\mC_{k,\cP\cP}+\sigma^2\mI\big)^{-1}\vy,
+\label{eq:gmm}
+\end{equation}
+with $p(k\,|\,\vy)\propto\pi_k\,\CN(\vy;\bm{0},\mC_{k,\cP\cP}+\sigma^2\mI)$~\cite{turan2022}. For $K=1$
+it reduces to \eqref{eq:lmmse} with zero mean.
+
+\emph{Learned estimator.} An MLP $f_\theta:\mathbb{R}^{2n_p+1}\to\mathbb{R}^{2|\cM|}$ maps
+$[\mathrm{Re}\,\vy;\mathrm{Im}\,\vy;\mathrm{SNR}/30]$ to $[\mathrm{Re}\,\hh_\cM;\mathrm{Im}\,\hh_\cM]$
+and is trained to minimize the squared error. Because the conditional mean
+$\mathbb{E}[\vh_\cM\,|\,\vy]$ is in general nonlinear in $\vy$ when $\vh$ is not Gaussian, a learned or
+mixture estimator can in principle beat \eqref{eq:lmmse}; whether the measured channel departs enough
+from a Gaussian is the empirical question.
+
+\emph{Assumptions.} (A1)~Pilot errors are additive white circular Gaussian noise; the noise is synthetic,
+and the measured CSI, which has its own estimation error, serves as the reference. (A2)~The receiver knows
+$\sigma^2$ unless stated otherwise (Section~\ref{sec:setup} relaxes this). (A3)~Training and test runs
+share the channel statistics (same room). (A4)~One snapshot at a time: no correlation over time is used,
+and in the main setting each antenna is estimated separately. (A5)~A fixed pilot pattern.
+
+%=====================================================================================================
+\section{Dataset and Preprocessing}
+\label{sec:data}
+\emph{Dataset.} dichasus-005x~\cite{euchner2021data} was recorded with the DICHASUS distributed massive
+MIMO channel sounder~\cite{euchner2021sounder}. A transmitter on a vacuum robot moved through a room in
+which a metallic barrier blocks the line of sight. The carrier frequency is 1.272\,GHz and the bandwidth
+50\,MHz, with 1024 OFDM subcarriers and 32 co-located receive antennas; transmitter positions come from the
+robot's LiDAR. The data (five robot runs 0053--0057, about 6.9\,GB of TFRecord files, CC~BY~4.0) contain
+for each snapshot a $32\times1024$ complex CSI matrix, an SNR field, the position and a timestamp.
+
+\emph{Preparation.} (i)~A NumPy-only TFRecord parser reads the files, and the subcarrier axis is
+\texttt{fftshift}ed into frequency order. (ii)~The published per-antenna timing and phase offsets of the
+sounder, $\tau_a$ and $\phi_a$, are compensated by multiplying subcarrier $k$ of antenna $a$ by
+$e^{j(2\pi k\tau_a/1024+\phi_a)}$. (iii)~We keep subcarriers 256--319 (64 subcarriers, 3.1\,MHz), inside
+the occupied band and away from the band edges and the DC subcarrier. (iv)~Screening: a few vectors are
+pure noise, and the dataset's SNR field does not identify them. For each (snapshot, antenna) vector we
+estimate the CSI error from fourth-order differences across frequency over subcarriers 128--893 without
+the DC region, $\hat\varepsilon=\overline{|\Delta^4H_k|^2}/(70\,\overline{|H_k|^2})$, where 70 is the noise gain of
+$\Delta^4$ for white errors and the smooth channel nearly cancels. Vectors with $\hat\varepsilon>-30$\,dB
+are removed (\tbd{screened fraction, runs 0053--0055 only}). (v)~The split is by run
+(Table~\ref{tab:data}), so adjacent snapshots never fall into different sets. Each antenna vector of a
+snapshot is one example. The scale $c$, all statistics and all model weights are fitted on the training
+runs only.
+
+\begin{table}[t]
+\caption{Data split; vectors counted after screening (validation: even / odd blocks)}
+\label{tab:data}
+\centering\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Use & Runs & Snapshots & 64-sc vectors & Joint samples\\
+\midrule
+Training & 0053--0055 & 15\,940 & 507\,853 & 15\,404\\
+Validation & 0056 & 5\,220 & 83\,502 / 82\,871 & 2\,530 / 2\,488\\
+Test (used once) & 0057 & [TBD] & [TBD] & [TBD]\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=====================================================================================================
+\section{Methods}
+\label{sec:methods}
+\emph{Interpolation.} Linear and natural cubic-spline interpolation of $\vy$ need neither statistics nor
+the noise level and represent common receiver practice~\cite{coleri2002}. Both are fixed linear maps
+$\hh=\bm{W}\vy$.
+
+\emph{LMMSE} \eqref{eq:lmmse} uses $\vmu$ and $\mC$ from all training vectors and the true $\sigma^2$. It is
+the reference for every gain we report, because it is the best linear estimator and, with about
+$5\times10^5$ training vectors for a $64\times64$ covariance, its statistics are accurate. The loading
+$\rho\in\{10^{-6},\dots,10^{-1}\}$ is chosen per pilot density and SNR on the selection blocks.
+
+\emph{MLP variants.} All use two hidden layers of 128 ReLU units (about 33\,000 parameters), one model per
+pilot density, trained on the training runs with pilot SNR drawn from $\mathcal{U}[0,30]$\,dB and fresh
+noise in every mini-batch (batch 256, Adam, 15 epochs, learning rate $10^{-3}$ decayed to $3\cdot10^{-4}$
+and $10^{-4}$); the epoch with the best selection-block NMSE is kept. (i)~\emph{Plain}: squared error, as
+in the proposal. (ii)~\emph{Relative-error loss}: each sample's squared error is divided by
+$\varepsilon(\sigma_i^2)$, the LMMSE error expected at its SNR, so that high-SNR samples, whose errors are
+far smaller, are not drowned out. (iii)~\emph{Residual}: the network outputs a correction that is added to
+the LMMSE estimate, so it starts from the strong linear solution. (iv)~\emph{Blind}: the SNR input is
+fixed to zero; it is needed for a fair noise-mismatch study. A $3\times256$ network checks whether
+capacity limits the plain MLP. The input is a short vector, not a time--frequency image, so we use fully
+connected networks rather than the CNNs of~\cite{soltani2019,li2020}.
+
+\emph{Joint antenna--frequency extension.} Within the 64-subcarrier block the training covariance is
+concentrated in very few eigenmodes (\tbd{energy fractions, channel-structure analysis of runs
+0053--0056}), leaving little room beyond \eqref{eq:lmmse}. Across the 32 antennas many more eigenmodes
+matter, yet the channel is governed by few physical quantities (transmitter position and orientation): it
+lies near a low-dimensional nonlinear set that one global covariance cannot represent, but a mixture of
+local covariances or a network can. We stack all 32 antennas on 16 of the 64 subcarriers (about every
+fourth) into $N=512$ entries per snapshot (snapshots whose 32 vectors all pass the screening) and place
+pilots on 32 antennas$\times$4 subcarriers or on 8 antennas (every fourth)$\times$4 subcarriers. Methods:
+\emph{joint LMMSE} \eqref{eq:lmmse} with the $512\times512$ training covariance; the \emph{GMM estimator}
+\eqref{eq:gmm}, fitted by EM on clean training channels from a $k$-means start, with zero-mean components
+(each snapshot has a random common phase) and shrinkage $\mC_k\leftarrow(1-\alpha)\mC_k+\alpha\mC$,
+$(K,\alpha)$ chosen on the selection blocks (\tbd{final grid}); a \emph{joint MLP} and a joint residual
+variant, trained as above with a random common phase per snapshot as augmentation
+(\tbd{architecture}). A \emph{position genie}, one covariance per cell of the true transmitter position,
+is not a receiver; it only shows how much the position structure could offer.
+
+%=====================================================================================================
+\section{Experimental Setup}
+\label{sec:setup}
+\emph{Operating conditions.} Pilot SNR 0, 5, \dots, 30\,dB (joint setting 0, 10, 20, 30\,dB); 16, 8 or 4
+of 64 pilots at $\mathrm{round}(\mathrm{linspace}(0,63,n_p))$, so both block ends are pilots and the
+withheld subcarriers are interpolated, not extrapolated.
+
+\emph{Validation protocol.} Run 0056 is cut into blocks of 50 consecutive snapshots. \emph{Even} blocks
+are used for every selection (loading $\rho$, $(K,\alpha)$, model configuration, early stopping);
+\emph{odd} blocks (52 blocks) for every reported validation number. Because consecutive snapshots are
+correlated, confidence intervals come from a paired block bootstrap: the reported blocks are resampled
+with replacement ($B\ge1000$ times), the NMSE \eqref{eq:nmse} of both methods is computed on the same resampled
+blocks, and the 2.5 and 97.5\,\% percentiles of their dB difference form the 95\,\% interval.
+
+\emph{Fairness.} All methods see identical noise realizations: for a given pilot density and SNR the
+noise is drawn with seed $1000n_p+\mathrm{SNR}$ (64-subcarrier setting) or $7919|\cP|+\mathrm{SNR}$ (joint
+setting). Every MLP is trained with three seeds and the GMM EM is run with three seeds; we report the seed
+average (per-block errors averaged over seeds before forming the NMSE) and the per-seed range.
+
+\emph{Noise-power mismatch.} The receiver assumes an SNR $a$ while the true SNR is $t$, both on
+$\{0,5,\dots,30\}$\,dB. LMMSE (with the loading chosen for $a$), the SNR-aware MLPs and the LMMSE part of
+the residual variant all receive the same wrong value $a$; every design stays frozen and only the true
+noise changes. The blind MLP needs no SNR and linear interpolation is unaffected. We report the NMSE loss
+relative to matched LMMSE and its worst case over $t$.
+
+\emph{Complexity.} Per estimate, interpolation and LMMSE cost $|\cM|\,n_p$ complex multiply--accumulates
+(MACs) with a precomputed matrix, the MLP $\sum_\ell d_{\ell-1}d_\ell$ real MACs over its layer widths
+$d_\ell$, and the GMM about $K(n_p^2+Nn_p)$ complex MACs. We also measure the CPU time per vector on one
+laptop CPU (Intel Core Ultra~5 125H) with the BLAS thread count fixed, because the default thread count
+dominates the run time of small matrix operations.
+
+\emph{Test run.} After all choices are frozen, one dedicated script evaluates run 0057 \emph{once}, with
+the training scale and the frozen loadings, mixtures and weights; intervals use all test blocks. The odd
+validation blocks, inspected repeatedly during development, cannot replace it, and all numbers in
+Section~\ref{sec:results} come from this run. All code is NumPy-based (scikit-learn only for $k$-means);
+every run is stored with its configuration, metrics, git commit and the SHA-256 of trained weights.
+
+%=====================================================================================================
+\section{Results and Discussion}
+\label{sec:results}
+\emph{Status: placeholders only. No result is final until the single test-run evaluation.}
+
+\begin{figure*}[t]
+\centering
+\figslot{fig_nmse_test.pdf}{\textwidth}{1.9in}{NMSE vs.\ pilot SNR on test run 0057; panels 16 / 8 / 4 of 64
+pilots; linear, spline, LMMSE, MLP variants; 95\,\% block-bootstrap CIs.}
+\caption{NMSE on the withheld subcarriers versus pilot SNR on the test run 0057, for 16, 8 and 4 of 64
+pilots. Error bars: 95\,\% block-bootstrap intervals. \tbd{final caption}}
+\label{fig:main}
+\end{figure*}
+
+\subsection{Main comparison on the test run}
+\tbd{Fig.~\ref{fig:main}: NMSE versus pilot SNR on run 0057 for linear, spline, LMMSE and the MLP
+variants, one panel per pilot density. Discuss the gap between interpolation and LMMSE, why the spline is
+worse than linear interpolation at low SNR, and how the gaps change with pilot density.}
+
+\subsection{Gains of the learned estimators over LMMSE}
+\tbd{Fig.~\ref{fig:gain}: paired gain over LMMSE (dB, positive = better) versus SNR for the MLP variants,
+mean over three seeds with the seed range and paired 95\,\% CIs. State in how many settings the interval
+excludes zero, and relate the result to the eigenvalue concentration of Section~\ref{sec:methods}.}
+
+\begin{figure}[t]
+\centering
+\figslot{fig_gain_test.pdf}{\columnwidth}{2.0in}{Gain over LMMSE (dB) vs.\ SNR for plain, relative-error,
+residual and blind MLP; mean and range over three seeds.}
+\caption{Gain of the learned estimators over LMMSE on the test run. \tbd{final caption}}
+\label{fig:gain}
+\end{figure}
+
+\subsection{Unknown noise power}
+\tbd{Fig.~\ref{fig:mismatch}: NMSE loss relative to matched LMMSE versus the assumed-minus-true SNR offset,
+for LMMSE, the SNR-aware MLP, the residual variant, the blind MLP and linear interpolation; worst case over
+true SNR 0--30\,dB.}
+
+\begin{figure}[t]
+\centering
+\figslot{fig_mismatch_test.pdf}{\columnwidth}{1.8in}{NMSE loss vs.\ SNR offset (assumed $-$ true) for
+LMMSE, SNR-aware MLP, residual, blind MLP, linear.}
+\caption{Robustness to a wrong noise-power assumption. \tbd{final caption}}
+\label{fig:mismatch}
+\end{figure}
+
+\subsection{Computational cost}
+\tbd{Table~\ref{tab:cost}: parameters, MACs per estimate and measured CPU time per vector for each
+method at 16, 8 and 4 pilots (fixed BLAS threads).}
+
+\begin{table}[t]
+\caption{Computational cost per estimate \tbd{values}}
+\label{tab:cost}
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Method & Parameters & MACs & CPU ($\mu$s/vector)\\
+\midrule
+Linear / spline & -- & -- & --\\
+LMMSE & -- & -- & --\\
+MLP $2\times128$ & -- & -- & --\\
+LMMSE + residual MLP & -- & -- & --\\
+Joint LMMSE & -- & -- & --\\
+GMM ($K=$ [TBD]) & -- & -- & --\\
+Joint MLP & -- & -- & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Joint antenna--frequency reconstruction}
+\tbd{Table~\ref{tab:joint}: joint LMMSE NMSE and the gains of the GMM estimator and the joint MLP over it,
+with paired 95\,\% CIs, for both pilot patterns at 0/10/20/30\,dB; the position genie as a non-receiver
+reference. Discuss where the gain appears (low SNR, pilots on few antennas) and the absolute error level.}
+
+\begin{table}[t]
+\caption{Joint setting ($N=512$): NMSE of joint LMMSE and gains over it (dB) \tbd{values}}
+\label{tab:joint}
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Pilots (ant.$\times$sc) & SNR & Joint LMMSE & GMM gain & MLP gain & Genie\\
+\midrule
+$32\times4$ & 0  & -- & -- & -- & --\\
+            & 10 & -- & -- & -- & --\\
+            & 20 & -- & -- & -- & --\\
+            & 30 & -- & -- & -- & --\\
+\midrule
+$8\times4$  & 0  & -- & -- & -- & --\\
+            & 10 & -- & -- & -- & --\\
+            & 20 & -- & -- & -- & --\\
+            & 30 & -- & -- & -- & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Discussion and limitations}
+\tbd{Answer the research question per setting; when a learned estimator helps and why; limitations: one
+room (training and test runs cover the same area), synthetic pilot noise, error of the reference CSI, no
+time correlation, and the training-set size of the 512-dimensional mixture.}
+
+%=====================================================================================================
 \section{Conclusion}
-
+\tbd{(1)~One-sentence answer to the research question for the 64-subcarrier setting and for the joint
+setting. (2)~Practical meaning for pilot overhead and for the choice between LMMSE and a learned
+estimator, including cost and robustness to a wrong noise level. (3)~Main limitations. (4)~Future work:
+another environment (dichasus-015x), structured (Kronecker) mixture covariances, bit-error rate, wider
+blocks.}
 
 \footnotesize
-\scriptsize
 \bibliographystyle{IEEEtran}
 \bibliography{reference}
 
