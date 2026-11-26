@@ -10,5 +10,24 @@
   "variants": ["mlp", "mlp_relweight", "residual", "mlp_blind"],
   "densities": [16, 8, 4],
   "snrs": [0, 5, 10, 15, 20, 25, 30]
+ },
+ "joint": {
+  "setting": "spacefreq (experiment 03): 32 antennas x 16 subcarriers",
+  "gmm_run": "results/20261126-1653_auto_gmm-seeds-spacefreq",
+  "gmm_seeds": [0, 1, 2],
+  "gmm_config": "per seed and row, the (K, alpha) that seed chose on validation; refit must reproduce model_sha256",
+  "mlp_runs": {
+   "32ant x 4sc": "results/20261126-1816_auto-p32_joint-mlp-val",
+   "8ant x 4sc": "results/20261126-1813_auto-p8_joint-mlp-val"
+  },
+  "mlp_variants": ["jmlp", "jresidual"],
+  "mlp_seeds": [0, 1, 2],
+  "patterns": ["32ant x 4sc", "8ant x 4sc"],
+  "snrs": [0, 10, 20, 30]
+ },
+ "validation_only": {
+  "space32 GMM (experiment 06)": "32-antenna denoising; not part of the report's comparison",
+  "SNR mismatch (experiment 04)": "robustness study; the matched diagonal is the main-line test",
+  "mlp_wide, early 3x256 network": "not carried forward"
  }
 }
