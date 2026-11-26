@@ -5,6 +5,10 @@ Nothing is selected on the evaluated run, and every reported block of the run co
 Main line (one antenna, 64 subcarriers, 16 / 8 / 4 pilots): the LMMSE loading rho comes from the
 validation baseline run, the MLPs are the saved weights of the validation runs (SHA-256 checked).
 
+SNR mismatch (experiment 04's grid, true x assumed SNR): every design is already frozen per assumed SNR
+(LMMSE with the validation loading for that SNR, the SNR-aware MLPs given the assumed value), so the grid
+needs no choice on the evaluated run; it is summarised with experiment 04's own summarize().
+
 Joint antenna x subcarrier setting ("spacefreq" of experiment 03: 32 antennas x 16 subcarriers, pilot
 patterns 32ant x 4sc and 8ant x 4sc):
   * joint LMMSE with the loading rho chosen on validation (experiment 07 records)
@@ -40,19 +44,20 @@ import numpy as np  # noqa: E402
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-for _exp in ("03_gmm_feasibility", "06_gmm_seeds", "07_joint_mlp"):
+for _exp in ("03_gmm_feasibility", "04_snr_mismatch", "06_gmm_seeds", "07_joint_mlp"):
     sys.path.insert(0, os.path.join(ROOT, "experiments", _exp))
 from dataset import DEFAULT_NPZ, TEST_RUN, bootstrap_ci, load_test  # noqa: E402
 from estimators import (LMMSE, add_noise, channel_stats, linear_matrix, nmse_db,  # noqa: E402
                         pilot_positions, spline_matrix, withheld)
-from neural import load_predictor  # noqa: E402
+from neural import VARIANTS, load_predictor  # noqa: E402
 from runlog import _git, code_state, load_artifacts, save_run  # noqa: E402
 import gmm_feasibility as g03  # noqa: E402  (cov, mix_estimate)
+import run_mismatch as g04  # noqa: E402     (summarize: experiment 04's summary of the SNR grid)
 import run_gmm_seeds as g06  # noqa: E402    (kmeans_labels, fit_em: the EM of experiment 06)
 import run_joint_mlp as j07  # noqa: E402    (global_cov, pattern_dict, load_joint_predictor)
 
 FROZEN = os.path.join(HERE, "frozen.json")
-PARTS = ("main", "joint")
+PARTS = ("main", "mismatch", "joint")
 B_TEST = 2000                                          # bootstrap resamples of the evaluated blocks
 TOL_DB = 1.5e-3                                        # rehearsal tolerance: 3-decimal rounding of the records
 
@@ -151,6 +156,105 @@ def check_rehearsal(out, fz, base, seeds, log):
     log(f"rehearsal (main): max |difference| to the frozen validation records = {worst:.4f} dB")
     if worst > TOL_DB:
         raise RuntimeError("rehearsal does not reproduce the validation numbers; do not run the test")
+    return worst
+
+
+# ----------------------------------------------------------------------------- SNR mismatch
+def evaluate_mismatch(fz, base, seeds, d, mask, log):
+    """Experiment 04's (true, assumed) grid on the vectors `mask` of d.Ht with the frozen designs.
+
+    Same arithmetic as run_mismatch.evaluate_density, except that the LMMSE loading for an assumed SNR a
+    is read from the frozen baselines record instead of being chosen (04 chose it the same way, on the even
+    validation blocks under matched noise; check_rehearsal_mismatch confirms both agree)."""
+    mm = fz["mismatch"]
+    snrs = list(mm["snrs"])
+    Ht = d.Ht[mask]
+    _, gid = np.unique(d.block_of[mask], return_inverse=True)
+    nb = int(gid.max()) + 1
+    boots = np.random.default_rng(0).integers(0, nb, (B_TEST, nb))
+    mu, C = channel_stats(d.Hf)
+    seed_ids = [rec["config"]["seed"] for rec, _ in seeds]
+    out = {}
+    for n_obs in mm["densities"]:
+        t0 = time.time()
+        p = pilot_positions(d.n, n_obs)
+        miss = withheld(d.n, p)
+        lm = LMMSE(mu, C, p)                                  # one object: the residuals share its eigen cache
+        Wl = linear_matrix(d.n, p)
+        Hr = Ht[:, miss]
+        ref_tot = np.sum(np.abs(Hr) ** 2)
+        S = len(snrs)
+        rho = {s: base["metrics"]["nmse"][str(n_obs)][str(s)]["lmmse_rho"] for s in snrs}
+        G = {s: lm.matrix(10 ** (-s / 10), rho[s]) for s in snrs}
+        nets = {}
+        for v in mm["variants"]:
+            aware, residual = VARIANTS[v][1], VARIANTS[v][2]
+            if residual and not aware:
+                raise ValueError(f"{v}: a residual variant without SNR input is not supported")
+            preds = [load_predictor(paths[f"{n_obs}_{v}.npz"], lm, miss)[0] for _, paths in seeds]
+            shape = (len(seeds), S, S) if aware else (len(seeds), S)
+            nets[v] = {"aware": aware, "seeds": seed_ids, "preds": preds,
+                       "nmse": np.zeros(shape), "err": np.zeros(shape + (nb,))}
+        raw = {"n_obs": n_obs, "pilots": p.tolist(), "rho": rho,
+               "ref_b": np.bincount(gid, np.sum(np.abs(Hr) ** 2, 1), nb),
+               "linear": {"nmse": np.zeros(S), "err": np.zeros((S, nb))},
+               "lmmse": {"nmse": np.zeros((S, S)), "err": np.zeros((S, S, nb))}, "nets": nets}
+
+        def put(slot, idx, est):
+            sq = np.abs(est - Hr) ** 2
+            slot["nmse"][idx] = 10 * np.log10(sq.sum() / ref_tot)
+            slot["err"][idx] = np.bincount(gid, sq.sum(1), nb)
+
+        for i, t in enumerate(snrs):
+            Y = add_noise(d.Ht[:, p], 10 ** (-t / 10), seed=1000 * n_obs + t)[mask]   # same draw as 01 / 02 / 04
+            put(raw["linear"], i, (Y @ Wl.T)[:, miss])
+            for net in nets.values():
+                if not net["aware"]:
+                    for k, pred in enumerate(net["preds"]):
+                        put(net, (k, i), pred(Y, np.zeros(len(Y))))       # blind: the SNR input is ignored
+            for j, s in enumerate(snrs):
+                put(raw["lmmse"], (i, j), lm.apply(Y, G[s])[:, miss])
+                s_vec = np.full(len(Y), float(s))
+                for net in nets.values():
+                    if net["aware"]:
+                        for k, pred in enumerate(net["preds"]):
+                            put(net, (k, i, j), pred(Y, s_vec))
+        for net in nets.values():
+            del net["preds"]
+        out[str(n_obs)] = g04.summarize(raw, snrs, boots)
+        wc = out[str(n_obs)]["worst_case_loss_db"]
+        msg = (f"  mismatch {n_obs:2d} pilots ({time.time() - t0:.0f} s): worst loss vs own matched SNR: "
+               + "  ".join(f"{v} {wc[v]['vs_own_matched']['loss_db']:.2f}" for v in ["lmmse"] + list(nets)
+                           if wc[v]["vs_own_matched"]))
+        if "mlp_blind" in nets:
+            msg += f"; blind MLP vs matched LMMSE at most {wc['mlp_blind']['vs_matched_lmmse']['loss_db']:.2f}"
+        log(msg)
+    return out
+
+
+def check_rehearsal_mismatch(out, fz, log):
+    """On run 56 odd blocks the grid must equal experiment 04's record: LMMSE loadings, the LMMSE and linear
+    grids, and every seed's NMSE grid of every variant."""
+    rec = read_json(os.path.join(fz["mismatch"]["validation_run"], "run.json"))["metrics"]["grid"]
+    worst, where, n = 0.0, "", 0
+    for dens, summ in out.items():
+        g, r = summ["grid"], rec[dens]
+        if {k: float(v) for k, v in g["lmmse_rho"].items()} != {k: float(v) for k, v in r["lmmse_rho"].items()}:
+            raise RuntimeError(f"{dens} pilots: frozen LMMSE loadings differ from experiment 04's choice")
+        pairs = [("lmmse", g["lmmse"]["nmse_db"], r["lmmse"]["nmse_db"]),
+                 ("linear", g["linear"]["nmse_db"], r["linear"]["nmse_db"])]
+        for v in fz["mismatch"]["variants"]:
+            for sd, grid in g[v]["per_seed_nmse_db"].items():
+                pairs.append((f"{v} seed {sd}", grid, r[v]["per_seed_nmse_db"][sd]))
+        for name, a, b in pairs:
+            diff = np.abs(np.asarray(a, float) - np.asarray(b, float))
+            n += diff.size
+            if diff.max() > worst:
+                worst, where = float(diff.max()), f"{dens} pilots {name}"
+    log(f"rehearsal (mismatch): max |difference| to experiment 04's record = {worst:.4f} dB over {n} numbers"
+        + (f" ({where})" if where else ""))
+    if worst > TOL_DB:
+        raise RuntimeError("mismatch rehearsal does not reproduce experiment 04; do not run the test")
     return worst
 
 
@@ -341,19 +445,38 @@ def main():
         rec06, mlp = load_frozen_joint(fz)
     config = {"run": a.run, "odd_only": a.odd_only, "parts": parts, "frozen": fz, "bootstrap_B": B_TEST}
     metrics = {}
-    if "main" in parts:
+    name = f"test-{TEST_RUN:04d}" if test else (
+        "rehearsal-0056" + ("-odd" if a.odd_only else "") + ("" if parts == list(PARTS) else "-" + "-".join(parts)))
+    partial = os.path.join(ROOT, "data", "logs", f"{time.strftime('%Y%m%d-%H%M')}_{name}_partial.json")
+
+    def keep():   # a crash in a later part must not lose the numbers already computed (data/ is not in git)
+        os.makedirs(os.path.dirname(partial), exist_ok=True)
+        with open(partial, "w", encoding="utf-8") as f:
+            json.dump({"config": config, "metrics": metrics}, f, indent=1)
+
+    if "main" in parts or "mismatch" in parts:
         d = load_test(a.data, test_run=a.run, confirm=test)
         mask = d.odd if a.odd_only else np.ones(len(d.Ht), bool)
         nb = len(np.unique(d.block_of[mask]))
         log(f"[main] run {a.run:04d}: fit {len(d.Hf)}, evaluated {int(mask.sum())} vectors in {nb} blocks; "
             f"screened fraction {d.screened_fraction}")
-        metrics["main"] = evaluate_main(fz, base, seeds, d, mask, log)
         config["main_data"] = {"n_vectors": int(mask.sum()), "n_blocks": int(nb),
                                "screened_fraction": d.screened_fraction}
+        if "main" in parts:
+            metrics["main"] = evaluate_main(fz, base, seeds, d, mask, log)
+            keep()
+            if not test:
+                metrics["rehearsal_max_abs_diff_db"] = check_rehearsal(metrics["main"], fz, base, seeds, log)
+        if "mismatch" in parts:
+            t = time.time()
+            log("[mismatch] true x assumed SNR grid with the frozen designs")
+            metrics["mismatch"] = evaluate_mismatch(fz, base, seeds, d, mask, log)
+            config["mismatch_runtime_s"] = round(time.time() - t, 1)
+            keep()
+            if not test:
+                metrics["rehearsal_mismatch_max_abs_diff_db"] = check_rehearsal_mismatch(metrics["mismatch"], fz, log)
         del d, mask
         gc.collect()
-        if not test:
-            metrics["rehearsal_max_abs_diff_db"] = check_rehearsal(metrics["main"], fz, base, seeds, log)
     if "joint" in parts:
         t = time.time()
         J = load_spacefreq(a.data, a.run, confirm=test)
@@ -365,16 +488,15 @@ def main():
         config["joint_data"] = {"n_vectors": int(mask.sum()), "n_blocks": int(nb), "dim": int(J["Xe"].shape[1]),
                                 "n_run_snapshots": J["n_run_snapshots"], "screened_fraction": J["screened_fraction"],
                                 "runtime_s": round(time.time() - t, 1)}
+        keep()
         if not test:
             metrics["rehearsal_joint_max_abs_diff_db"] = check_rehearsal_joint(metrics["joint"], fz, rec06, mlp, log)
     config["runtime_s"] = round(time.time() - t0, 1)
-    if test:
-        name = f"test-{TEST_RUN:04d}"
-    else:
-        name = "rehearsal-0056" + ("-odd" if a.odd_only else "") + ("" if parts == list(PARTS) else "-" + "-".join(parts))
     save_run(name, a.member, config, metrics,
              note=("THE single evaluation on test run 0057 with frozen choices" if test
                    else "rehearsal of the test code path on validation run 0056"))
+    if os.path.exists(partial):
+        os.remove(partial)                                  # the full record is saved
     log(f"done in {time.time() - t0:.0f} s")
 
 

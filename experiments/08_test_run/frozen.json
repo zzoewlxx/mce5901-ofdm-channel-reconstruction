@@ -11,6 +11,13 @@
   "densities": [16, 8, 4],
   "snrs": [0, 5, 10, 15, 20, 25, 30]
  },
+ "mismatch": {
+  "validation_run": "results/20261126-1625_auto_snr-mismatch-val",
+  "designs": "LMMSE for assumed SNR a: main.baselines_run loading for a; SNR-aware MLPs get a; mlp_blind ignores it",
+  "variants": ["mlp", "mlp_relweight", "residual", "mlp_blind"],
+  "densities": [16, 8, 4],
+  "snrs": [0, 5, 10, 15, 20, 25, 30]
+ },
  "joint": {
   "setting": "spacefreq (experiment 03): 32 antennas x 16 subcarriers",
   "gmm_run": "results/20261126-1653_auto_gmm-seeds-spacefreq",
@@ -27,7 +34,7 @@
  },
  "validation_only": {
   "space32 GMM (experiment 06)": "32-antenna denoising; not part of the report's comparison",
-  "SNR mismatch (experiment 04)": "robustness study; the matched diagonal is the main-line test",
+  "position genie (experiment 03)": "uses the true position; a diagnostic, not a receiver",
   "mlp_wide, early 3x256 network": "not carried forward"
  }
 }

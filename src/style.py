@@ -14,7 +14,7 @@ COLORS = {
     "mlp": "#D55E00",             # vermillion
     "mlp_relweight": "#CC79A7",   # reddish purple
     "residual": "#0072B2",        # blue
-    "mlp_blind": "#7F7F7F",       # grey
+    "mlp_blind": "#4D4D4D",       # dark grey (#7F7F7F matched the LMMSE green under deuteranopia)
     "mlp_wide": "#8C564B",        # brown
     "gmm": "#000000",             # black
     "genie": "#999999",           # light grey, dashed: references that are not usable receivers
