@@ -356,17 +356,17 @@ batch time, one pinned core). 64-subcarrier methods at 8 of 64 pilots; joint met
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
-Method & Parameters & MACs & CPU ($\mu$s)\
+Method & Parameters & MACs & CPU ($\mu$s)\\
 \midrule
-Linear interpolation & 512 & 2\,048 & 0.9\
-LMMSE & 1\,152 & 2\,048 & 2.0\
-MLP $2\times128$ & 33\,264 & 32\,896 & 14.7\
-LMMSE + residual MLP & 34\,553 & 35\,216 & 20.1\
+Linear interpolation & 512 & 2\,048 & 0.9\\
+LMMSE & 1\,152 & 2\,048 & 2.0\\
+MLP $2\times128$ & 33\,264 & 32\,896 & 14.7\\
+LMMSE + residual MLP & 34\,553 & 35\,216 & 20.1\\
 \midrule
-Joint LMMSE & 132\,096 & 262\,144 & 20.9\
-Joint MLP $2\times512$ & 788\,736 & 786\,944 & 69.5\
-Joint LMMSE + residual MLP & 953\,729 & 1\,114\,880 & 189\
-GMM, $K=64$ & 8\,388\,672 & 16\,809\,984 & 1\,225\
+Joint LMMSE & 132\,096 & 262\,144 & 20.9\\
+Joint MLP $2\times512$ & 788\,736 & 786\,944 & 69.5\\
+Joint LMMSE + residual MLP & 953\,729 & 1\,114\,880 & 189\\
+GMM, $K=64$ & 8\,388\,672 & 16\,809\,984 & 1\,225\\
 \bottomrule
 \end{tabular}
 \end{table}
