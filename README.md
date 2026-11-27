@@ -4,6 +4,8 @@
 
 **一句话：** 用 DICHASUS 的真实测量信道（dichasus-005x），研究如何从 64 个子载波中少量带噪声的导频（16、8 或 4 个）恢复其余子载波上的信道。比较四种方法：线性插值、三次样条插值、用训练数据估计协方差的 LMMSE，以及一个小型神经网络（MLP）。
 
+> **第一次接触本项目？先读 [中文白皮书](docs/whitepaper.md)。** 它从选题、基础概念、方法、实验一直讲到测试结果、可信度和复现步骤，配有图表，不需要通信背景。
+
 > 原始数据和模型权重不进仓库，见下文"数据"。
 
 ## 进度
@@ -158,6 +160,7 @@ experiments/          每个阶段一个文件夹，脚本可以独立运行
   07_joint_mlp/          天线 × 子载波联合 MLP（验证集）
   08_test_run/           测试集 run 0057 上的唯一一次评估（frozen.json + 演练 + 测试）
 results/              每次正式运行的结果（小文件），规则见 results/README.md
+docs/whitepaper.md    中文白皮书（入门首读），图在 docs/whitepaper_fig/（make_figures.py 从测试记录生成）
 docs/proposal/        提案（v1 是组员原稿，v2 是提交版）
 report/               最终报告（IEEE 会议模板，main.tex + reference.bib）
 data/                 本地数据（不进 git）
